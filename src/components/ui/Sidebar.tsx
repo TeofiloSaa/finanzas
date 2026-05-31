@@ -9,11 +9,11 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="hidden md:flex flex-col fixed left-0 top-0 h-full w-60 border-r border-white/5"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="hidden md:flex flex-col fixed left-0 top-0 h-full w-60 border-r border-fg/5"
+      style={{ backgroundColor: 'var(--surface)' }}
     >
-      <div className="px-6 py-6 border-b border-white/5">
-        <span className="text-lg font-semibold text-white tracking-tight">
+      <div className="px-6 py-6 border-b border-fg/5">
+        <span className="text-lg font-semibold text-fg tracking-tight">
           Finanzas
         </span>
       </div>
@@ -28,13 +28,13 @@ export default function Sidebar() {
               prefetch
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
               style={{
-                color: active ? '#fff' : 'rgba(255,255,255,0.5)',
+                color: active ? '#fff' : 'var(--muted)',
                 backgroundColor: active ? '#3b7ff5' : 'transparent',
               }}
               onMouseEnter={(e) => {
                 if (!active)
                   e.currentTarget.style.backgroundColor =
-                    'rgba(255,255,255,0.05)'
+                    'var(--hover)'
               }}
               onMouseLeave={(e) => {
                 if (!active) e.currentTarget.style.backgroundColor = 'transparent'

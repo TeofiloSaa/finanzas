@@ -103,22 +103,22 @@ function ConfirmModal({
       aria-modal="true"
     >
       <div
-        className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl border-t sm:border border-white/10 px-6 pt-6 pb-24 sm:pb-6"
-        style={{ backgroundColor: '#1a1d27' }}
+        className="w-full sm:max-w-sm rounded-t-2xl sm:rounded-2xl border-t sm:border border-fg/10 px-6 pt-6 pb-24 sm:pb-6"
+        style={{ backgroundColor: 'var(--surface)' }}
       >
         {options.title && (
-          <h2 className="text-base font-semibold text-white mb-2">
+          <h2 className="text-base font-semibold text-fg mb-2">
             {options.title}
           </h2>
         )}
-        <p className="text-sm text-white/65 mb-5 leading-relaxed">
+        <p className="text-sm text-fg/65 mb-5 leading-relaxed">
           {options.message}
         </p>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white/60 border border-white/10 hover:bg-white/5 transition-colors cursor-pointer"
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-fg/60 border border-fg/10 hover:bg-fg/5 transition-colors cursor-pointer"
           >
             {options.cancelLabel ?? 'Cancelar'}
           </button>
@@ -126,7 +126,7 @@ function ConfirmModal({
             type="button"
             onClick={onConfirm}
             autoFocus
-            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+            className="flex-1 py-2.5 rounded-lg text-sm font-medium text-fg transition-opacity hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: confirmBg }}
           >
             {options.confirmLabel ?? 'Confirmar'}

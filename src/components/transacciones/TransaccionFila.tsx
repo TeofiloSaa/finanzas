@@ -43,8 +43,8 @@ export default function TransaccionFila({
   return (
     <div
       className={`flex items-center gap-3 px-4 py-3 group transition-colors ${
-        !isLast ? 'border-b border-white/5' : ''
-      } ${deleting ? 'opacity-40 pointer-events-none' : 'hover:bg-white/[0.03]'}`}
+        !isLast ? 'border-b border-fg/5' : ''
+      } ${deleting ? 'opacity-40 pointer-events-none' : 'hover:bg-fg/[0.03]'}`}
     >
       {/* Tipo icon */}
       <div
@@ -57,19 +57,19 @@ export default function TransaccionFila({
       {/* Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium text-white truncate">
+          <span className="text-sm font-medium text-fg truncate">
             {t.category}
           </span>
           {t.description && (
-            <span className="text-xs text-white/40 truncate hidden sm:block">
+            <span className="text-xs text-fg/40 truncate hidden sm:block">
               {t.description}
             </span>
           )}
         </div>
         <div className="flex items-center gap-1.5 mt-0.5">
-          <span className="text-xs text-white/35">{formatDate(t.date)}</span>
+          <span className="text-xs text-fg/35">{formatDate(t.date)}</span>
           {t.description && (
-            <span className="text-xs text-white/35 truncate sm:hidden">
+            <span className="text-xs text-fg/35 truncate sm:hidden">
               · {t.description}
             </span>
           )}
@@ -90,7 +90,7 @@ export default function TransaccionFila({
         <button
           onClick={() => onEdit(t)}
           disabled={deleting}
-          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-white/25 hover:text-[#3b7ff5] hover:bg-[#3b7ff5]/10 transition-all cursor-pointer disabled:cursor-not-allowed"
+          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-fg/25 hover:text-[#3b7ff5] hover:bg-[#3b7ff5]/10 transition-all cursor-pointer disabled:cursor-not-allowed"
           aria-label="Editar transacción"
         >
           <Pencil size={14} strokeWidth={1.75} />
@@ -98,7 +98,7 @@ export default function TransaccionFila({
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer disabled:cursor-not-allowed"
+          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-fg/25 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer disabled:cursor-not-allowed"
           aria-label="Eliminar transacción"
         >
           <Trash2 size={14} strokeWidth={1.75} />

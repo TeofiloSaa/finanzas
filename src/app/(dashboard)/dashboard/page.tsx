@@ -121,8 +121,8 @@ export default async function DashboardPage() {
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-        <p className="text-white/40 mt-0.5 text-sm">Resumen de {tituloMes}</p>
+        <h1 className="text-2xl font-semibold text-fg">Dashboard</h1>
+        <p className="text-fg/40 mt-0.5 text-sm">Resumen de {tituloMes}</p>
       </div>
 
       {/* Resumen del mes */}
@@ -185,11 +185,11 @@ function SummaryCard({
     : formatCurrency(value)
   return (
     <div
-      className="rounded-xl border border-white/5 px-5 py-4"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="rounded-xl border border-fg/5 px-5 py-4"
+      style={{ backgroundColor: 'var(--surface)' }}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-white/40">{label}</span>
+        <span className="text-xs text-fg/40">{label}</span>
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center"
           style={{ backgroundColor: `${color}1f` }}
@@ -218,12 +218,12 @@ function Section({
 }) {
   return (
     <section
-      className="rounded-xl border border-white/5 p-5 mb-4"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="rounded-xl border border-fg/5 p-5 mb-4"
+      style={{ backgroundColor: 'var(--surface)' }}
     >
       <div className="mb-4">
-        <h2 className="text-sm font-semibold text-white">{title}</h2>
-        {subtitle && <p className="text-xs text-white/35 mt-0.5">{subtitle}</p>}
+        <h2 className="text-sm font-semibold text-fg">{title}</h2>
+        {subtitle && <p className="text-xs text-fg/35 mt-0.5">{subtitle}</p>}
       </div>
       {children}
     </section>
@@ -233,21 +233,21 @@ function Section({
 function MetasWidget({ goals }: { goals: SavingsGoal[] }) {
   return (
     <div
-      className="rounded-xl border border-white/5 p-5"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="rounded-xl border border-fg/5 p-5"
+      style={{ backgroundColor: 'var(--surface)' }}
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-white">Metas de ahorro</h2>
+        <h2 className="text-sm font-semibold text-fg">Metas de ahorro</h2>
         <Link
           href="/ahorros"
-          className="flex items-center gap-1 text-xs text-white/40 hover:text-white transition-colors"
+          className="flex items-center gap-1 text-xs text-fg/40 hover:text-fg transition-colors"
         >
           Ver todas <ArrowRight size={12} />
         </Link>
       </div>
 
       {goals.length === 0 ? (
-        <p className="text-sm text-white/35 py-6 text-center">
+        <p className="text-sm text-fg/35 py-6 text-center">
           No hay metas activas
         </p>
       ) : (
@@ -259,17 +259,17 @@ function MetasWidget({ goals }: { goals: SavingsGoal[] }) {
             return (
               <li key={g.id} className="flex flex-col gap-1.5">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="text-sm text-white truncate">{g.name}</span>
-                  <span className="text-xs text-white/40 tabular-nums shrink-0">
+                  <span className="text-sm text-fg truncate">{g.name}</span>
+                  <span className="text-xs text-fg/40 tabular-nums shrink-0">
                     {formatCurrency(current)} /{' '}
-                    <span className="text-white/30">
+                    <span className="text-fg/30">
                       {formatCurrency(target)}
                     </span>
                   </span>
                 </div>
                 <div
                   className="h-1.5 rounded-full overflow-hidden"
-                  style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
+                  style={{ backgroundColor: 'var(--hover)' }}
                 >
                   <div
                     className="h-full rounded-full transition-all"
@@ -291,21 +291,21 @@ function MetasWidget({ goals }: { goals: SavingsGoal[] }) {
 function DeudasWidget({ debts }: { debts: Debt[] }) {
   return (
     <div
-      className="rounded-xl border border-white/5 p-5"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="rounded-xl border border-fg/5 p-5"
+      style={{ backgroundColor: 'var(--surface)' }}
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-semibold text-white">Deudas activas</h2>
+        <h2 className="text-sm font-semibold text-fg">Deudas activas</h2>
         <Link
           href="/deudas"
-          className="flex items-center gap-1 text-xs text-white/40 hover:text-white transition-colors"
+          className="flex items-center gap-1 text-xs text-fg/40 hover:text-fg transition-colors"
         >
           Ver todas <ArrowRight size={12} />
         </Link>
       </div>
 
       {debts.length === 0 ? (
-        <p className="text-sm text-white/35 py-6 text-center">
+        <p className="text-sm text-fg/35 py-6 text-center">
           Sin deudas activas
         </p>
       ) : (
@@ -318,11 +318,11 @@ function DeudasWidget({ debts }: { debts: Debt[] }) {
             return (
               <li
                 key={d.id}
-                className="flex items-center gap-3 pb-3 border-b border-white/5 last:border-0 last:pb-0"
+                className="flex items-center gap-3 pb-3 border-b border-fg/5 last:border-0 last:pb-0"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm text-white truncate">{d.name}</p>
-                  <div className="flex items-center gap-1 text-xs text-white/40 mt-0.5">
+                  <p className="text-sm text-fg truncate">{d.name}</p>
+                  <div className="flex items-center gap-1 text-xs text-fg/40 mt-0.5">
                     <CalendarClock size={11} />
                     <span>{formatDate(toDateString(nextDue))}</span>
                   </div>

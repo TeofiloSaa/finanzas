@@ -51,17 +51,17 @@ export default function InstallBanner() {
     <div
       className="fixed bottom-16 left-0 right-0 z-50 md:hidden flex items-center gap-3 px-4 py-3 border-t"
       style={{
-        backgroundColor: '#1a1d27',
-        borderColor: 'rgba(255,255,255,0.08)',
+        backgroundColor: 'var(--surface)',
+        borderColor: 'var(--border)',
       }}
     >
       <span className="text-lg select-none">📲</span>
-      <p className="flex-1 text-sm text-white leading-tight">
+      <p className="flex-1 text-sm text-fg leading-tight">
         Instalá Finanzas en tu celu
       </p>
       <button
         onClick={handleInstall}
-        className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium text-white"
+        className="shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium text-fg"
         style={{ backgroundColor: '#3b7ff5' }}
       >
         Instalar
@@ -69,7 +69,7 @@ export default function InstallBanner() {
       <button
         onClick={handleDismiss}
         className="shrink-0 p-1 rounded-md"
-        style={{ color: 'rgba(255,255,255,0.5)' }}
+        style={{ color: 'var(--muted)' }}
         aria-label="Cerrar"
       >
         <X size={16} />

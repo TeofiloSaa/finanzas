@@ -17,8 +17,8 @@ export default function TransaccionesLoading() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-white/5 px-4 py-3"
-            style={{ backgroundColor: '#1a1d27' }}
+            className="rounded-xl border border-fg/5 px-4 py-3"
+            style={{ backgroundColor: 'var(--surface)' }}
           >
             <Skel className="h-3 w-16 mb-1.5" />
             <Skel className="h-4 w-20" />
@@ -34,14 +34,14 @@ export default function TransaccionesLoading() {
 
       {/* Lista */}
       <div
-        className="rounded-xl border border-white/5 overflow-hidden"
-        style={{ backgroundColor: '#1a1d27' }}
+        className="rounded-xl border border-fg/5 overflow-hidden"
+        style={{ backgroundColor: 'var(--surface)' }}
       >
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
             className={`flex items-center gap-3 px-4 py-3 ${
-              i !== 5 ? 'border-b border-white/5' : ''
+              i !== 5 ? 'border-b border-fg/5' : ''
             }`}
           >
             <Skel className="h-9 w-9 rounded-full shrink-0" />

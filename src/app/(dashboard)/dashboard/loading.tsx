@@ -13,8 +13,8 @@ export default function DashboardLoading() {
         {Array.from({ length: 3 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-white/5 px-5 py-4"
-            style={{ backgroundColor: '#1a1d27' }}
+            className="rounded-xl border border-fg/5 px-5 py-4"
+            style={{ backgroundColor: 'var(--surface)' }}
           >
             <div className="flex items-center justify-between mb-3">
               <Skel className="h-3 w-24" />
@@ -27,8 +27,8 @@ export default function DashboardLoading() {
 
       {/* Donut section */}
       <section
-        className="rounded-xl border border-white/5 p-5 mb-4"
-        style={{ backgroundColor: '#1a1d27' }}
+        className="rounded-xl border border-fg/5 p-5 mb-4"
+        style={{ backgroundColor: 'var(--surface)' }}
       >
         <Skel className="h-4 w-40 mb-1" />
         <Skel className="h-3 w-28 mb-4" />
@@ -38,7 +38,7 @@ export default function DashboardLoading() {
               <Skel className="absolute inset-0 rounded-full" />
               <div
                 className="absolute inset-[20px] rounded-full"
-                style={{ backgroundColor: '#1a1d27' }}
+                style={{ backgroundColor: 'var(--surface)' }}
               />
             </div>
           </div>
@@ -57,8 +57,8 @@ export default function DashboardLoading() {
 
       {/* Bar chart section */}
       <section
-        className="rounded-xl border border-white/5 p-5 mb-4"
-        style={{ backgroundColor: '#1a1d27' }}
+        className="rounded-xl border border-fg/5 p-5 mb-4"
+        style={{ backgroundColor: 'var(--surface)' }}
       >
         <Skel className="h-4 w-40 mb-1" />
         <Skel className="h-3 w-28 mb-4" />
@@ -83,8 +83,8 @@ export default function DashboardLoading() {
         {Array.from({ length: 2 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-white/5 p-5"
-            style={{ backgroundColor: '#1a1d27' }}
+            className="rounded-xl border border-fg/5 p-5"
+            style={{ backgroundColor: 'var(--surface)' }}
           >
             <div className="flex items-center justify-between mb-4">
               <Skel className="h-4 w-32" />

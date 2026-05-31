@@ -20,8 +20,8 @@ export default function DeudasLoading() {
         {Array.from({ length: 2 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-white/5 p-5"
-            style={{ backgroundColor: '#1a1d27' }}
+            className="rounded-xl border border-fg/5 p-5"
+            style={{ backgroundColor: 'var(--surface)' }}
           >
             {/* Header */}
             <div className="flex items-start justify-between gap-3 mb-4">
@@ -56,14 +56,14 @@ export default function DeudasLoading() {
             </div>
 
             {/* Chips */}
-            <div className="flex flex-wrap gap-1.5 py-3 border-t border-white/5">
+            <div className="flex flex-wrap gap-1.5 py-3 border-t border-fg/5">
               {Array.from({ length: 12 }).map((_, j) => (
                 <Skel key={j} className="h-7 w-7 rounded-md" />
               ))}
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+            <div className="flex items-center justify-between pt-3 border-t border-fg/5">
               <Skel className="h-3 w-32" />
               <Skel className="h-7 w-28 rounded-lg" />
             </div>

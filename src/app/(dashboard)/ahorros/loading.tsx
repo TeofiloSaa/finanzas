@@ -20,8 +20,8 @@ export default function AhorrosLoading() {
         {Array.from({ length: 4 }).map((_, i) => (
           <div
             key={i}
-            className="rounded-xl border border-white/5 p-5"
-            style={{ backgroundColor: '#1a1d27' }}
+            className="rounded-xl border border-fg/5 p-5"
+            style={{ backgroundColor: 'var(--surface)' }}
           >
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="flex-1">
@@ -35,7 +35,7 @@ export default function AhorrosLoading() {
               <Skel className="h-3 w-12" />
               <Skel className="h-3 w-32" />
             </div>
-            <div className="flex items-center justify-between pt-3 border-t border-white/5">
+            <div className="flex items-center justify-between pt-3 border-t border-fg/5">
               <Skel className="h-3 w-28" />
               <Skel className="h-7 w-20 rounded-lg" />
             </div>

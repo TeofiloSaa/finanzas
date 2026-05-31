@@ -5,7 +5,7 @@ import { X } from 'lucide-react'
 import { crearMeta } from '@/app/actions/savings'
 
 const INPUT_CLASS =
-  'rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 border border-white/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
+  'rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
 
 export default function NuevaMetaModal({
   onClose,
@@ -42,15 +42,15 @@ export default function NuevaMetaModal({
       onClick={handleBackdropClick}
     >
       <div
-        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border-t sm:border border-white/10 px-6 pt-6 pb-24 sm:pb-6"
-        style={{ backgroundColor: '#1a1d27' }}
+        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border-t sm:border border-fg/10 px-6 pt-6 pb-24 sm:pb-6"
+        style={{ backgroundColor: 'var(--surface)' }}
       >
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-white">Nueva meta</h2>
+          <h2 className="text-base font-semibold text-fg">Nueva meta</h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/8 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-fg/40 hover:text-fg hover:bg-fg/8 transition-colors cursor-pointer"
           >
             <X size={17} />
           </button>
@@ -58,7 +58,7 @@ export default function NuevaMetaModal({
 
         <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label htmlFor="name" className="text-sm font-medium text-white/60">
+            <label htmlFor="name" className="text-sm font-medium text-fg/60">
               Nombre
             </label>
             <input
@@ -70,14 +70,14 @@ export default function NuevaMetaModal({
               maxLength={100}
               placeholder="Ej: Viaje a Brasil"
               className={INPUT_CLASS}
-              style={{ backgroundColor: '#0f1117' }}
+              style={{ backgroundColor: 'var(--background)' }}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="target_amount"
-              className="text-sm font-medium text-white/60"
+              className="text-sm font-medium text-fg/60"
             >
               Monto objetivo ($)
             </label>
@@ -90,17 +90,17 @@ export default function NuevaMetaModal({
               required
               placeholder="0.00"
               className={INPUT_CLASS}
-              style={{ backgroundColor: '#0f1117' }}
+              style={{ backgroundColor: 'var(--background)' }}
             />
           </div>
 
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="deadline"
-              className="text-sm font-medium text-white/60"
+              className="text-sm font-medium text-fg/60"
             >
               Fecha límite{' '}
-              <span className="text-white/25 font-normal text-xs">
+              <span className="text-fg/25 font-normal text-xs">
                 (opcional)
               </span>
             </label>
@@ -109,7 +109,7 @@ export default function NuevaMetaModal({
               name="deadline"
               type="date"
               className={INPUT_CLASS}
-              style={{ backgroundColor: '#0f1117', colorScheme: 'dark' }}
+              style={{ backgroundColor: 'var(--background)', colorScheme: 'dark' }}
             />
           </div>
 
@@ -123,14 +123,14 @@ export default function NuevaMetaModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white/50 border border-white/10 hover:bg-white/5 transition-colors cursor-pointer"
+              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-fg/50 border border-fg/10 hover:bg-fg/5 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
+              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-fg transition-opacity disabled:opacity-60 cursor-pointer"
               style={{ backgroundColor: '#3b7ff5' }}
             >
               {loading ? 'Creando...' : 'Crear meta'}

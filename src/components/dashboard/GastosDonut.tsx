@@ -31,11 +31,11 @@ function CustomTooltip({
   const item = payload[0]
   return (
     <div
-      className="rounded-lg border border-white/10 px-3 py-2 shadow-xl"
-      style={{ backgroundColor: '#0f1117' }}
+      className="rounded-lg border border-fg/10 px-3 py-2 shadow-xl"
+      style={{ backgroundColor: 'var(--background)' }}
     >
-      <p className="text-xs text-white/60 mb-0.5">{item.payload.category}</p>
-      <p className="text-sm font-semibold text-white tabular-nums">
+      <p className="text-xs text-fg/60 mb-0.5">{item.payload.category}</p>
+      <p className="text-sm font-semibold text-fg tabular-nums">
         {formatCurrency(item.value)}
       </p>
     </div>
@@ -48,11 +48,11 @@ export default function GastosDonut({ data }: { data: CategoriaData[] }) {
       <div className="flex flex-col items-center justify-center py-12">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-          style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
+          style={{ backgroundColor: 'var(--hover)' }}
         >
-          <PieIcon size={20} className="text-white/30" strokeWidth={1.75} />
+          <PieIcon size={20} className="text-fg/30" strokeWidth={1.75} />
         </div>
-        <p className="text-sm text-white/40">Sin gastos este mes</p>
+        <p className="text-sm text-fg/40">Sin gastos este mes</p>
       </div>
     )
   }
@@ -81,8 +81,8 @@ export default function GastosDonut({ data }: { data: CategoriaData[] }) {
           </PieChart>
         </ResponsiveContainer>
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <p className="text-xs text-white/40 mb-0.5">Total</p>
-          <p className="text-sm font-semibold text-white tabular-nums">
+          <p className="text-xs text-fg/40 mb-0.5">Total</p>
+          <p className="text-sm font-semibold text-fg tabular-nums">
             {formatCurrency(total)}
           </p>
         </div>
@@ -97,11 +97,11 @@ export default function GastosDonut({ data }: { data: CategoriaData[] }) {
                 className="shrink-0 w-2.5 h-2.5 rounded-sm"
                 style={{ backgroundColor: PALETTE[i % PALETTE.length] }}
               />
-              <span className="text-white/70 truncate flex-1">{d.category}</span>
-              <span className="text-white/40 text-xs tabular-nums shrink-0">
+              <span className="text-fg/70 truncate flex-1">{d.category}</span>
+              <span className="text-fg/40 text-xs tabular-nums shrink-0">
                 {pct.toFixed(0)}%
               </span>
-              <span className="text-white font-semibold tabular-nums shrink-0 min-w-[80px] text-right">
+              <span className="text-fg font-semibold tabular-nums shrink-0 min-w-[80px] text-right">
                 {formatCurrency(d.value)}
               </span>
             </li>

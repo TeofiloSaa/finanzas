@@ -31,10 +31,10 @@ function CustomTooltip({
   if (!active || !payload?.length) return null
   return (
     <div
-      className="rounded-lg border border-white/10 px-3 py-2 shadow-xl min-w-[140px]"
-      style={{ backgroundColor: '#0f1117' }}
+      className="rounded-lg border border-fg/10 px-3 py-2 shadow-xl min-w-[140px]"
+      style={{ backgroundColor: 'var(--background)' }}
     >
-      <p className="text-xs text-white/60 mb-1.5">{label}</p>
+      <p className="text-xs text-fg/60 mb-1.5">{label}</p>
       <div className="flex flex-col gap-1">
         {payload.map((entry) => (
           <div
@@ -46,7 +46,7 @@ function CustomTooltip({
                 className="w-2 h-2 rounded-sm"
                 style={{ backgroundColor: entry.color }}
               />
-              <span className="text-white/60 capitalize">{entry.name}</span>
+              <span className="text-fg/60 capitalize">{entry.name}</span>
             </div>
             <span
               className="font-semibold tabular-nums"
@@ -75,11 +75,11 @@ export default function IngresosGastosBar({ data }: { data: MesData[] }) {
       <div className="flex flex-col items-center justify-center py-12">
         <div
           className="w-12 h-12 rounded-full flex items-center justify-center mb-3"
-          style={{ backgroundColor: 'rgba(255,255,255,0.04)' }}
+          style={{ backgroundColor: 'var(--hover)' }}
         >
-          <BarChart3 size={20} className="text-white/30" strokeWidth={1.75} />
+          <BarChart3 size={20} className="text-fg/30" strokeWidth={1.75} />
         </div>
-        <p className="text-sm text-white/40">Sin movimientos en los últimos 6 meses</p>
+        <p className="text-sm text-fg/40">Sin movimientos en los últimos 6 meses</p>
       </div>
     )
   }
@@ -90,18 +90,18 @@ export default function IngresosGastosBar({ data }: { data: MesData[] }) {
         <BarChart data={data} barGap={4}>
           <CartesianGrid
             strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.05)"
+            stroke="var(--hover)"
             vertical={false}
           />
           <XAxis
             dataKey="month"
-            stroke="rgba(255,255,255,0.4)"
+            stroke="var(--muted)"
             tick={{ fontSize: 11 }}
             tickLine={false}
-            axisLine={{ stroke: 'rgba(255,255,255,0.08)' }}
+            axisLine={{ stroke: 'var(--border)' }}
           />
           <YAxis
-            stroke="rgba(255,255,255,0.4)"
+            stroke="var(--muted)"
             tick={{ fontSize: 11 }}
             tickLine={false}
             axisLine={false}
@@ -110,13 +110,13 @@ export default function IngresosGastosBar({ data }: { data: MesData[] }) {
           />
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+            cursor={{ fill: 'var(--hover)' }}
           />
           <Legend
             iconType="square"
             wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
             formatter={(value) => (
-              <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: 4 }}>
+              <span style={{ color: 'var(--muted)', marginLeft: 4 }}>
                 {value}
               </span>
             )}

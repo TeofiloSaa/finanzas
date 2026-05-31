@@ -58,10 +58,10 @@ export default function MetaCard({
         deleting ? 'opacity-40 pointer-events-none' : ''
       }`}
       style={{
-        backgroundColor: '#1a1d27',
+        backgroundColor: 'var(--surface)',
         borderColor: goal.completed
           ? 'rgba(74,222,128,0.2)'
-          : 'rgba(255,255,255,0.05)',
+          : 'var(--hover)',
       }}
     >
       {/* Header */}
@@ -76,14 +76,14 @@ export default function MetaCard({
                 <Check size={12} strokeWidth={3} style={{ color: '#4ade80' }} />
               </div>
             )}
-            <h3 className="text-base font-semibold text-white truncate">
+            <h3 className="text-base font-semibold text-fg truncate">
               {goal.name}
             </h3>
           </div>
           {goal.deadline && (
             <div className="flex items-center gap-1.5 text-xs">
-              <Calendar size={11} className="text-white/35" />
-              <span className="text-white/45">{formatDate(goal.deadline)}</span>
+              <Calendar size={11} className="text-fg/35" />
+              <span className="text-fg/45">{formatDate(goal.deadline)}</span>
               {!goal.completed && days !== null && (
                 <span
                   className="ml-1"
@@ -92,7 +92,7 @@ export default function MetaCard({
                       ? '#f87171'
                       : urgent
                         ? '#fbbf24'
-                        : 'rgba(255,255,255,0.3)',
+                        : 'var(--muted)',
                   }}
                 >
                   {overdue
@@ -109,7 +109,7 @@ export default function MetaCard({
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="p-1.5 rounded-md text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:cursor-not-allowed shrink-0"
+          className="p-1.5 rounded-md text-fg/25 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:cursor-not-allowed shrink-0"
           aria-label="Eliminar meta"
         >
           <Trash2 size={14} strokeWidth={1.75} />
@@ -120,7 +120,7 @@ export default function MetaCard({
       <div className="mb-3">
         <div
           className="h-2 rounded-full overflow-hidden"
-          style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
+          style={{ backgroundColor: 'var(--hover)' }}
         >
           <div
             className="h-full rounded-full transition-all duration-500"
@@ -134,14 +134,14 @@ export default function MetaCard({
           >
             {progress.toFixed(0)}%
           </span>
-          <span className="text-xs text-white/40 tabular-nums">
+          <span className="text-xs text-fg/40 tabular-nums">
             {formatCurrency(current)} / {formatCurrency(target)}
           </span>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/5">
+      <div className="flex items-center justify-between gap-3 pt-3 border-t border-fg/5">
         <div className="text-xs">
           {goal.completed ? (
             <span style={{ color: '#4ade80' }} className="font-medium">
@@ -149,8 +149,8 @@ export default function MetaCard({
             </span>
           ) : (
             <>
-              <span className="text-white/40">Falta </span>
-              <span className="text-white font-semibold tabular-nums">
+              <span className="text-fg/40">Falta </span>
+              <span className="text-fg font-semibold tabular-nums">
                 {formatCurrency(restante)}
               </span>
             </>
@@ -160,7 +160,7 @@ export default function MetaCard({
         {!goal.completed && (
           <button
             onClick={onAportar}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium text-fg transition-opacity hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: '#3b7ff5' }}
           >
             <Plus size={13} strokeWidth={2.5} />

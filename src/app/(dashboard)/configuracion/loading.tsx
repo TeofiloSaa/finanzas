@@ -13,8 +13,8 @@ export default function ConfiguracionLoading() {
       {Array.from({ length: 3 }).map((_, i) => (
         <section
           key={i}
-          className="rounded-xl border border-white/5 p-5 mb-4"
-          style={{ backgroundColor: '#1a1d27' }}
+          className="rounded-xl border border-fg/5 p-5 mb-4"
+          style={{ backgroundColor: 'var(--surface)' }}
         >
           <div className="flex items-center gap-2 mb-4">
             <Skel className="h-3.5 w-3.5 rounded-sm" />

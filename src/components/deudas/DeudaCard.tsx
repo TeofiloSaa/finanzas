@@ -102,10 +102,10 @@ export default function DeudaCard({
         busy === 'delete' ? 'opacity-40 pointer-events-none' : ''
       }`}
       style={{
-        backgroundColor: '#1a1d27',
+        backgroundColor: 'var(--surface)',
         borderColor: saldada
           ? 'rgba(74,222,128,0.2)'
-          : 'rgba(255,255,255,0.05)',
+          : 'var(--hover)',
       }}
     >
       {/* Header */}
@@ -127,13 +127,13 @@ export default function DeudaCard({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-base font-semibold text-white truncate">
+            <h3 className="text-base font-semibold text-fg truncate">
               {debt.name}
             </h3>
             <div className="flex items-center gap-2 mt-0.5 text-xs">
-              <span className="text-white/40">{typeLabel}</span>
-              <span className="text-white/20">·</span>
-              <span className="text-white/40">
+              <span className="text-fg/40">{typeLabel}</span>
+              <span className="text-fg/20">·</span>
+              <span className="text-fg/40">
                 Vto. día {debt.due_day} de cada mes
               </span>
             </div>
@@ -143,7 +143,7 @@ export default function DeudaCard({
         <button
           onClick={handleDelete}
           disabled={busy !== null}
-          className="p-1.5 rounded-md text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:cursor-not-allowed shrink-0"
+          className="p-1.5 rounded-md text-fg/25 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:cursor-not-allowed shrink-0"
           aria-label="Eliminar deuda"
         >
           <Trash2 size={14} strokeWidth={1.75} />
@@ -153,19 +153,19 @@ export default function DeudaCard({
       {/* Cifras */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div>
-          <p className="text-xs text-white/35 mb-0.5">Total</p>
-          <p className="text-sm font-semibold text-white tabular-nums">
+          <p className="text-xs text-fg/35 mb-0.5">Total</p>
+          <p className="text-sm font-semibold text-fg tabular-nums">
             {formatCurrency(total)}
           </p>
         </div>
         <div>
-          <p className="text-xs text-white/35 mb-0.5">Por cuota</p>
-          <p className="text-sm font-semibold text-white tabular-nums">
+          <p className="text-xs text-fg/35 mb-0.5">Por cuota</p>
+          <p className="text-sm font-semibold text-fg tabular-nums">
             {formatCurrency(installmentAmount)}
           </p>
         </div>
         <div>
-          <p className="text-xs text-white/35 mb-0.5">Restante</p>
+          <p className="text-xs text-fg/35 mb-0.5">Restante</p>
           <p
             className="text-sm font-semibold tabular-nums"
             style={{ color: saldada ? '#4ade80' : '#f87171' }}
@@ -182,24 +182,24 @@ export default function DeudaCard({
           style={{
             backgroundColor: vencimientoUrgente
               ? 'rgba(251,191,36,0.08)'
-              : 'rgba(255,255,255,0.03)',
+              : 'var(--hover)',
           }}
         >
           <CalendarClock
             size={14}
             style={{
-              color: vencimientoUrgente ? '#fbbf24' : 'rgba(255,255,255,0.4)',
+              color: vencimientoUrgente ? '#fbbf24' : 'var(--muted)',
             }}
           />
-          <span className="text-xs text-white/50">
+          <span className="text-xs text-fg/50">
             Próximo vencimiento:
           </span>
           <span
             className="text-xs font-semibold ml-auto"
-            style={{ color: vencimientoUrgente ? '#fbbf24' : '#fff' }}
+            style={{ color: vencimientoUrgente ? '#fbbf24' : 'var(--fg)' }}
           >
             {formatDateObj(nextDueDate)}
-            <span className="text-white/40 font-normal ml-1.5">
+            <span className="text-fg/40 font-normal ml-1.5">
               {daysUntil === 0
                 ? '(hoy)'
                 : daysUntil === 1
@@ -214,7 +214,7 @@ export default function DeudaCard({
       <div className="mb-3">
         <div
           className="h-2 rounded-full overflow-hidden"
-          style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}
+          style={{ backgroundColor: 'var(--hover)' }}
         >
           <div
             className="h-full rounded-full transition-all duration-500"
@@ -231,14 +231,14 @@ export default function DeudaCard({
           >
             {paid} / {totalCuotas} cuotas pagadas
           </span>
-          <span className="text-xs text-white/40 tabular-nums">
+          <span className="text-xs text-fg/40 tabular-nums">
             {progress.toFixed(0)}%
           </span>
         </div>
       </div>
 
       {/* Chips de cuotas */}
-      <div className="flex flex-wrap gap-1.5 py-3 border-t border-white/5">
+      <div className="flex flex-wrap gap-1.5 py-3 border-t border-fg/5">
         {Array.from({ length: totalCuotas }, (_, i) => {
           const n = i + 1
           const isPaid = n <= paid
@@ -252,12 +252,12 @@ export default function DeudaCard({
                   ? '#3b7ff5'
                   : isNext
                     ? 'rgba(59,127,245,0.08)'
-                    : 'rgba(255,255,255,0.04)',
+                    : 'var(--hover)',
                 color: isPaid
                   ? '#fff'
                   : isNext
                     ? '#3b7ff5'
-                    : 'rgba(255,255,255,0.25)',
+                    : 'var(--muted)',
                 border: isNext ? '1px dashed #3b7ff5' : '1px solid transparent',
               }}
               title={
@@ -282,14 +282,14 @@ export default function DeudaCard({
           </span>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/5">
-          <p className="text-xs text-white/40">
+        <div className="flex items-center justify-between gap-3 pt-3 border-t border-fg/5">
+          <p className="text-xs text-fg/40">
             Inicio: {formatDate(debt.start_date)}
           </p>
           <button
             onClick={handlePay}
             disabled={busy !== null}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-white transition-opacity hover:opacity-90 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-fg transition-opacity hover:opacity-90 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ backgroundColor: '#3b7ff5' }}
           >
             <Check size={13} strokeWidth={2.5} />

@@ -9,8 +9,8 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="flex md:hidden fixed bottom-0 left-0 right-0 border-t border-white/5 z-50"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="flex md:hidden fixed bottom-0 left-0 right-0 border-t border-fg/5 z-50"
+      style={{ backgroundColor: 'var(--surface)' }}
     >
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(href + '/')
@@ -20,7 +20,7 @@ export default function BottomNav() {
             href={href}
             prefetch
             className="flex flex-col items-center justify-center gap-1 flex-1 py-3 text-xs font-medium transition-colors"
-            style={{ color: active ? '#3b7ff5' : 'rgba(255,255,255,0.45)' }}
+            style={{ color: active ? '#3b7ff5' : 'var(--muted)' }}
           >
             <Icon size={20} strokeWidth={1.75} />
             <span className="leading-none">{label}</span>

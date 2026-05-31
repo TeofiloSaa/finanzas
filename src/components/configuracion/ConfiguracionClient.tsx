@@ -12,6 +12,9 @@ import {
   Trash2,
   ChevronUp,
   ChevronDown,
+  Palette,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { logout } from '@/app/actions/auth'
@@ -21,6 +24,7 @@ import {
   reordenarCategoria,
 } from '@/app/actions/categories'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
+import { useTheme, type Theme } from '@/components/ui/ThemeProvider'
 import type { Category, TransactionType } from '@/types'
 
 const CURRENCY_KEY = 'finanzas.currency'
@@ -49,7 +53,7 @@ const PALETTE = [
 ]
 
 const INPUT_CLASS =
-  'rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 border border-white/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
+  'rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
 
 export default function ConfiguracionClient({
   email,
@@ -71,6 +75,7 @@ export default function ConfiguracionClient({
   const [currencySaved, setCurrencySaved] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const confirm = useConfirm()
+  const { theme, setTheme } = useTheme()
 
   useEffect(() => {
     const stored = localStorage.getItem(CURRENCY_KEY)
@@ -113,9 +118,44 @@ export default function ConfiguracionClient({
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-white">Configuración</h1>
-        <p className="text-white/40 mt-0.5 text-sm">Ajustes de tu cuenta</p>
+        <h1 className="text-2xl font-semibold text-fg">Configuración</h1>
+        <p className="text-fg/40 mt-0.5 text-sm">Ajustes de tu cuenta</p>
       </div>
+
+      {/* Apariencia */}
+      <Section title="Apariencia" Icon={Palette}>
+        <div className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-fg/60">Tema</span>
+          <div
+            className="flex rounded-lg p-1 gap-1"
+            style={{ backgroundColor: 'var(--inset)' }}
+          >
+            {(
+              [
+                { value: 'light', label: 'Claro', Icon: Sun },
+                { value: 'dark', label: 'Oscuro', Icon: Moon },
+              ] as { value: Theme; label: string; Icon: typeof Sun }[]
+            ).map(({ value, label, Icon }) => {
+              const active = theme === value
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setTheme(value)}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                  style={{
+                    backgroundColor: active ? '#3b7ff5' : 'transparent',
+                    color: active ? '#fff' : 'var(--muted)',
+                  }}
+                >
+                  <Icon size={15} strokeWidth={2} />
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </Section>
 
       {/* Perfil */}
       <Section title="Perfil" Icon={User}>
@@ -125,10 +165,10 @@ export default function ConfiguracionClient({
           className="flex flex-col gap-4"
         >
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-white/60">Email</span>
+            <span className="text-sm font-medium text-fg/60">Email</span>
             <div
-              className="rounded-lg px-3 py-2.5 text-sm text-white/60 border border-white/5 cursor-not-allowed"
-              style={{ backgroundColor: 'rgba(255,255,255,0.02)' }}
+              className="rounded-lg px-3 py-2.5 text-sm text-fg/60 border border-fg/5 cursor-not-allowed"
+              style={{ backgroundColor: 'var(--inset)' }}
             >
               {email}
             </div>
@@ -137,7 +177,7 @@ export default function ConfiguracionClient({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="full_name"
-              className="text-sm font-medium text-white/60"
+              className="text-sm font-medium text-fg/60"
             >
               Nombre completo
             </label>
@@ -149,7 +189,7 @@ export default function ConfiguracionClient({
               defaultValue={initialFullName}
               placeholder="Tu nombre"
               className={INPUT_CLASS}
-              style={{ backgroundColor: '#0f1117' }}
+              style={{ backgroundColor: 'var(--background)' }}
             />
           </div>
 
@@ -176,7 +216,7 @@ export default function ConfiguracionClient({
             <button
               type="submit"
               disabled={savingProfile}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
+              className="px-4 py-2 rounded-lg text-sm font-medium text-fg transition-opacity disabled:opacity-60 cursor-pointer"
               style={{ backgroundColor: '#3b7ff5' }}
             >
               {savingProfile ? 'Guardando...' : 'Guardar cambios'}
@@ -188,7 +228,7 @@ export default function ConfiguracionClient({
       {/* Moneda */}
       <Section title="Moneda" Icon={DollarSign}>
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="currency" className="text-sm font-medium text-white/60">
+          <label htmlFor="currency" className="text-sm font-medium text-fg/60">
             Moneda predeterminada
           </label>
           <select
@@ -196,7 +236,7 @@ export default function ConfiguracionClient({
             value={currency}
             onChange={(e) => handleCurrencyChange(e.target.value)}
             className={INPUT_CLASS}
-            style={{ backgroundColor: '#0f1117' }}
+            style={{ backgroundColor: 'var(--background)' }}
           >
             {CURRENCIES.map((c) => (
               <option key={c.value} value={c.value}>
@@ -205,7 +245,7 @@ export default function ConfiguracionClient({
             ))}
           </select>
           <div className="flex items-center justify-between mt-1 min-h-[18px]">
-            <p className="text-xs text-white/30">
+            <p className="text-xs text-fg/30">
               Por ahora solo se guarda la preferencia, no convierte valores.
             </p>
             {currencySaved && (
@@ -226,7 +266,7 @@ export default function ConfiguracionClient({
       {/* Sesión */}
       <Section title="Sesión" Icon={LogOut}>
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-white/50">
+          <p className="text-sm text-fg/50">
             Cerrá la sesión en este dispositivo.
           </p>
           <button
@@ -323,11 +363,11 @@ function CategoriasManager({ categories }: { categories: Category[] }) {
             maxLength={40}
             placeholder="Nombre de la categoría"
             className={INPUT_CLASS}
-            style={{ backgroundColor: '#0f1117' }}
+            style={{ backgroundColor: 'var(--background)' }}
           />
           <div
             className="flex rounded-lg p-1 gap-1 shrink-0"
-            style={{ backgroundColor: '#0f1117' }}
+            style={{ backgroundColor: 'var(--background)' }}
           >
             {(['gasto', 'ingreso'] as TransactionType[]).map((t) => {
               const active = type === t
@@ -338,12 +378,12 @@ function CategoriasManager({ categories }: { categories: Category[] }) {
                   onClick={() => setType(t)}
                   className="flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
                   style={{
-                    backgroundColor: active ? '#1a1d27' : 'transparent',
+                    backgroundColor: active ? 'var(--surface)' : 'transparent',
                     color: active
                       ? t === 'gasto'
                         ? '#f87171'
                         : '#4ade80'
-                      : 'rgba(255,255,255,0.35)',
+                      : 'var(--muted)',
                   }}
                 >
                   {t === 'gasto' ? 'Gasto' : 'Ingreso'}
@@ -367,7 +407,7 @@ function CategoriasManager({ categories }: { categories: Category[] }) {
                 style={{
                   backgroundColor: c,
                   boxShadow: selected
-                    ? '0 0 0 2px #1a1d27, 0 0 0 4px #fff'
+                    ? '0 0 0 2px var(--surface), 0 0 0 4px var(--fg)'
                     : 'none',
                 }}
               >
@@ -375,7 +415,7 @@ function CategoriasManager({ categories }: { categories: Category[] }) {
                   <Check
                     size={14}
                     strokeWidth={3}
-                    className="mx-auto text-white"
+                    className="mx-auto text-fg"
                   />
                 )}
               </button>
@@ -393,7 +433,7 @@ function CategoriasManager({ categories }: { categories: Category[] }) {
           <button
             type="submit"
             disabled={adding}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-fg transition-opacity disabled:opacity-60 cursor-pointer"
             style={{ backgroundColor: '#3b7ff5' }}
           >
             <Plus size={15} strokeWidth={2.5} />
@@ -440,28 +480,28 @@ function CategoryGroup({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-white/35">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-fg/35">
         {label}
       </h3>
       {items.length === 0 ? (
-        <p className="text-sm text-white/30">Sin categorías.</p>
+        <p className="text-sm text-fg/30">Sin categorías.</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {items.map((cat, i) => (
             <div
               key={cat.id}
-              className="flex items-center gap-3 rounded-lg px-3 py-2 border border-white/5"
-              style={{ backgroundColor: '#0f1117' }}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 border border-fg/5"
+              style={{ backgroundColor: 'var(--background)' }}
             >
               <span
                 className="h-3.5 w-3.5 rounded-full shrink-0"
                 style={{ backgroundColor: cat.color }}
               />
-              <span className="text-sm text-white flex-1 truncate">
+              <span className="text-sm text-fg flex-1 truncate">
                 {cat.name}
               </span>
               {cat.is_default ? (
-                <span className="text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded text-white/40 border border-white/10">
+                <span className="text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded text-fg/40 border border-fg/10">
                   Default
                 </span>
               ) : (
@@ -470,7 +510,7 @@ function CategoryGroup({
                     onClick={() => onReorder(cat, 'up')}
                     disabled={i === 0 || busyId === cat.id}
                     aria-label={`Subir ${cat.name}`}
-                    className="p-1.5 rounded-md text-white/30 hover:text-white hover:bg-white/8 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    className="p-1.5 rounded-md text-fg/30 hover:text-fg hover:bg-fg/8 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                   >
                     <ChevronUp size={15} />
                   </button>
@@ -478,7 +518,7 @@ function CategoryGroup({
                     onClick={() => onReorder(cat, 'down')}
                     disabled={i === items.length - 1 || busyId === cat.id}
                     aria-label={`Bajar ${cat.name}`}
-                    className="p-1.5 rounded-md text-white/30 hover:text-white hover:bg-white/8 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    className="p-1.5 rounded-md text-fg/30 hover:text-fg hover:bg-fg/8 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent"
                   >
                     <ChevronDown size={15} />
                   </button>
@@ -486,7 +526,7 @@ function CategoryGroup({
                     onClick={() => onDelete(cat)}
                     disabled={deletingId === cat.id}
                     aria-label={`Eliminar ${cat.name}`}
-                    className="p-1.5 rounded-md text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                    className="p-1.5 rounded-md text-fg/30 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <Trash2 size={15} />
                   </button>
@@ -511,12 +551,12 @@ function Section({
 }) {
   return (
     <section
-      className="rounded-xl border border-white/5 p-5 mb-4"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="rounded-xl border border-fg/5 p-5 mb-4"
+      style={{ backgroundColor: 'var(--surface)' }}
     >
       <div className="flex items-center gap-2 mb-4">
-        <Icon size={14} className="text-white/40" strokeWidth={1.75} />
-        <h2 className="text-sm font-semibold text-white">{title}</h2>
+        <Icon size={14} className="text-fg/40" strokeWidth={1.75} />
+        <h2 className="text-sm font-semibold text-fg">{title}</h2>
       </div>
       {children}
     </section>

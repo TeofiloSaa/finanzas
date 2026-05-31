@@ -20,15 +20,15 @@ export default function RegisterPage() {
 
   return (
     <div
-      className="w-full max-w-sm rounded-2xl border border-white/8 p-8"
-      style={{ backgroundColor: '#1a1d27' }}
+      className="w-full max-w-sm rounded-2xl border border-fg/8 p-8"
+      style={{ backgroundColor: 'var(--surface)' }}
     >
-      <h1 className="text-xl font-semibold text-white mb-1">Crear cuenta</h1>
-      <p className="text-sm text-white/50 mb-6">Empezá a controlar tus finanzas</p>
+      <h1 className="text-xl font-semibold text-fg mb-1">Crear cuenta</h1>
+      <p className="text-sm text-fg/50 mb-6">Empezá a controlar tus finanzas</p>
 
       <form action={handleSubmit} className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-sm text-white/70 font-medium">
+          <label htmlFor="email" className="text-sm text-fg/70 font-medium">
             Email
           </label>
           <input
@@ -37,15 +37,15 @@ export default function RegisterPage() {
             type="email"
             required
             placeholder="tu@email.com"
-            className="rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 border border-white/10 outline-none focus:border-[#3b7ff5] transition-colors"
-            style={{ backgroundColor: '#0f1117' }}
+            className="rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors"
+            style={{ backgroundColor: 'var(--background)' }}
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
           <label
             htmlFor="password"
-            className="text-sm text-white/70 font-medium"
+            className="text-sm text-fg/70 font-medium"
           >
             Contraseña
           </label>
@@ -56,8 +56,8 @@ export default function RegisterPage() {
             required
             placeholder="••••••••"
             minLength={6}
-            className="rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 border border-white/10 outline-none focus:border-[#3b7ff5] transition-colors"
-            style={{ backgroundColor: '#0f1117' }}
+            className="rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors"
+            style={{ backgroundColor: 'var(--background)' }}
           />
         </div>
 
@@ -70,14 +70,14 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-1 rounded-lg py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
+          className="mt-1 rounded-lg py-2.5 text-sm font-medium text-fg transition-opacity disabled:opacity-60 cursor-pointer"
           style={{ backgroundColor: '#3b7ff5' }}
         >
           {loading ? 'Creando cuenta...' : 'Crear cuenta'}
         </button>
       </form>
 
-      <p className="text-center text-sm text-white/50 mt-6">
+      <p className="text-center text-sm text-fg/50 mt-6">
         ¿Ya tenés cuenta?{' '}
         <Link href="/login" className="text-[#3b7ff5] hover:underline">
           Iniciá sesión

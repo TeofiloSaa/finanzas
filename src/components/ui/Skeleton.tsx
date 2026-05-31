@@ -8,7 +8,7 @@ export function Skel({
   return (
     <div
       className={`rounded animate-pulse ${className}`}
-      style={{ backgroundColor: 'rgba(255,255,255,0.06)', ...style }}
+      style={{ backgroundColor: 'var(--skeleton)', ...style }}
     />
   )
 }

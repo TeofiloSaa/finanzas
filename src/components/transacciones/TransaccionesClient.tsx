@@ -90,8 +90,8 @@ export default function TransaccionesClient({
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Transacciones</h1>
-          <p className="text-white/40 mt-0.5 text-sm">
+          <h1 className="text-2xl font-semibold text-fg">Transacciones</h1>
+          <p className="text-fg/40 mt-0.5 text-sm">
             {filtered.length !== transactions.length
               ? `${filtered.length} de ${transactions.length}`
               : transactions.length === 1
@@ -101,7 +101,7 @@ export default function TransaccionesClient({
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-white shrink-0 cursor-pointer transition-opacity hover:opacity-90"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-fg shrink-0 cursor-pointer transition-opacity hover:opacity-90"
           style={{ backgroundColor: '#3b7ff5' }}
         >
           <Plus size={15} strokeWidth={2.5} />
@@ -124,10 +124,10 @@ export default function TransaccionesClient({
           ].map(({ label, value, color }) => (
             <div
               key={label}
-              className="rounded-xl border border-white/5 px-4 py-3"
-              style={{ backgroundColor: '#1a1d27' }}
+              className="rounded-xl border border-fg/5 px-4 py-3"
+              style={{ backgroundColor: 'var(--surface)' }}
             >
-              <p className="text-xs text-white/40 mb-1">{label}</p>
+              <p className="text-xs text-fg/40 mb-1">{label}</p>
               <p className="text-sm font-semibold tabular-nums" style={{ color }}>
                 {formatARS(Math.abs(value))}
               </p>
@@ -141,7 +141,7 @@ export default function TransaccionesClient({
         {/* Tipo */}
         <div
           className="flex rounded-lg p-0.5 gap-0.5"
-          style={{ backgroundColor: '#1a1d27' }}
+          style={{ backgroundColor: 'var(--surface)' }}
         >
           {(['todos', 'ingreso', 'gasto'] as FilterType[]).map((t) => (
             <button
@@ -150,9 +150,9 @@ export default function TransaccionesClient({
               className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer"
               style={{
                 backgroundColor:
-                  filterType === t ? '#0f1117' : 'transparent',
+                  filterType === t ? 'var(--background)' : 'transparent',
                 color:
-                  filterType === t ? '#fff' : 'rgba(255,255,255,0.4)',
+                  filterType === t ? '#fff' : 'var(--muted)',
               }}
             >
               {TYPE_LABELS[t]}
@@ -165,8 +165,8 @@ export default function TransaccionesClient({
           <select
             value={filterMonth}
             onChange={(e) => setFilterMonth(e.target.value)}
-            className="px-3 py-1.5 rounded-lg text-xs text-white border border-white/10 outline-none cursor-pointer"
-            style={{ backgroundColor: '#1a1d27' }}
+            className="px-3 py-1.5 rounded-lg text-xs text-fg border border-fg/10 outline-none cursor-pointer"
+            style={{ backgroundColor: 'var(--surface)' }}
           >
             <option value="">Todos los meses</option>
             {availableMonths.map((m) => (
@@ -181,10 +181,10 @@ export default function TransaccionesClient({
       {/* Lista */}
       {filtered.length === 0 ? (
         <div
-          className="rounded-xl border border-white/5 flex flex-col items-center justify-center py-16 px-4"
-          style={{ backgroundColor: '#1a1d27' }}
+          className="rounded-xl border border-fg/5 flex flex-col items-center justify-center py-16 px-4"
+          style={{ backgroundColor: 'var(--surface)' }}
         >
-          <p className="text-white/35 text-sm text-center">
+          <p className="text-fg/35 text-sm text-center">
             {transactions.length === 0
               ? 'Aún no tenés transacciones. ¡Registrá la primera!'
               : 'Sin resultados para los filtros seleccionados.'}
@@ -192,7 +192,7 @@ export default function TransaccionesClient({
           {transactions.length === 0 && (
             <button
               onClick={() => setModalOpen(true)}
-              className="mt-4 px-4 py-2 rounded-lg text-sm font-medium text-white cursor-pointer transition-opacity hover:opacity-90"
+              className="mt-4 px-4 py-2 rounded-lg text-sm font-medium text-fg cursor-pointer transition-opacity hover:opacity-90"
               style={{ backgroundColor: '#3b7ff5' }}
             >
               Registrar transacción
@@ -201,8 +201,8 @@ export default function TransaccionesClient({
         </div>
       ) : (
         <div
-          className="rounded-xl border border-white/5 overflow-hidden"
-          style={{ backgroundColor: '#1a1d27' }}
+          className="rounded-xl border border-fg/5 overflow-hidden"
+          style={{ backgroundColor: 'var(--surface)' }}
         >
           {filtered.map((t, i) => (
             <TransaccionFila

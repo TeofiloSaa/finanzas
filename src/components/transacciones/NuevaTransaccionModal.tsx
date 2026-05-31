@@ -6,7 +6,7 @@ import { crearTransaccion, editarTransaccion } from '@/app/actions/transactions'
 import type { Transaction, TransactionType, Category } from '@/types'
 
 const INPUT_CLASS =
-  'rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 border border-white/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
+  'rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
 
 export default function NuevaTransaccionModal({
   transaction,
@@ -59,18 +59,18 @@ export default function NuevaTransaccionModal({
       onClick={handleBackdropClick}
     >
       <div
-        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border-t sm:border border-white/10 px-6 pt-6 pb-24 sm:pb-6"
-        style={{ backgroundColor: '#1a1d27' }}
+        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border-t sm:border border-fg/10 px-6 pt-6 pb-24 sm:pb-6"
+        style={{ backgroundColor: 'var(--surface)' }}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-base font-semibold text-white">
+          <h2 className="text-base font-semibold text-fg">
             {isEdit ? 'Editar transacción' : 'Nueva transacción'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/8 transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-fg/40 hover:text-fg hover:bg-fg/8 transition-colors cursor-pointer"
           >
             <X size={17} />
           </button>
@@ -79,10 +79,10 @@ export default function NuevaTransaccionModal({
         <form ref={formRef} onSubmit={handleSubmit} className="flex flex-col gap-4">
           {/* Tipo */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-sm font-medium text-white/60">Tipo</span>
+            <span className="text-sm font-medium text-fg/60">Tipo</span>
             <div
               className="flex rounded-lg p-1 gap-1"
-              style={{ backgroundColor: '#0f1117' }}
+              style={{ backgroundColor: 'var(--background)' }}
             >
               {(['gasto', 'ingreso'] as TransactionType[]).map((t) => {
                 const active = type === t
@@ -93,12 +93,12 @@ export default function NuevaTransaccionModal({
                     onClick={() => setType(t)}
                     className="flex-1 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
                     style={{
-                      backgroundColor: active ? '#1a1d27' : 'transparent',
+                      backgroundColor: active ? 'var(--surface)' : 'transparent',
                       color: active
                         ? t === 'gasto'
                           ? '#f87171'
                           : '#4ade80'
-                        : 'rgba(255,255,255,0.35)',
+                        : 'var(--muted)',
                     }}
                   >
                     {t === 'gasto' ? 'Gasto' : 'Ingreso'}
@@ -112,7 +112,7 @@ export default function NuevaTransaccionModal({
           {/* Fecha y Monto en fila */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="date" className="text-sm font-medium text-white/60">
+              <label htmlFor="date" className="text-sm font-medium text-fg/60">
                 Fecha
               </label>
               <input
@@ -122,13 +122,13 @@ export default function NuevaTransaccionModal({
                 defaultValue={transaction?.date ?? today}
                 required
                 className={INPUT_CLASS}
-                style={{ backgroundColor: '#0f1117', colorScheme: 'dark' }}
+                style={{ backgroundColor: 'var(--background)', colorScheme: 'dark' }}
               />
             </div>
             <div className="flex flex-col gap-1.5">
               <label
                 htmlFor="amount"
-                className="text-sm font-medium text-white/60"
+                className="text-sm font-medium text-fg/60"
               >
                 Monto ($)
               </label>
@@ -143,7 +143,7 @@ export default function NuevaTransaccionModal({
                 autoFocus
                 defaultValue={transaction?.amount ?? ''}
                 className={INPUT_CLASS}
-                style={{ backgroundColor: '#0f1117' }}
+                style={{ backgroundColor: 'var(--background)' }}
               />
             </div>
           </div>
@@ -152,7 +152,7 @@ export default function NuevaTransaccionModal({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="category"
-              className="text-sm font-medium text-white/60"
+              className="text-sm font-medium text-fg/60"
             >
               Categoría
             </label>
@@ -167,7 +167,7 @@ export default function NuevaTransaccionModal({
                   : categoryNames[0]
               }
               className={INPUT_CLASS}
-              style={{ backgroundColor: '#0f1117' }}
+              style={{ backgroundColor: 'var(--background)' }}
             >
               {filteredCategories.map((cat) => (
                 <option key={cat.id} value={cat.name}>
@@ -181,10 +181,10 @@ export default function NuevaTransaccionModal({
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="description"
-              className="text-sm font-medium text-white/60"
+              className="text-sm font-medium text-fg/60"
             >
               Descripción{' '}
-              <span className="text-white/25 font-normal text-xs">
+              <span className="text-fg/25 font-normal text-xs">
                 (opcional)
               </span>
             </label>
@@ -196,7 +196,7 @@ export default function NuevaTransaccionModal({
               maxLength={200}
               defaultValue={transaction?.description ?? ''}
               className={INPUT_CLASS}
-              style={{ backgroundColor: '#0f1117' }}
+              style={{ backgroundColor: 'var(--background)' }}
             />
           </div>
 
@@ -212,14 +212,14 @@ export default function NuevaTransaccionModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white/50 border border-white/10 hover:bg-white/5 transition-colors cursor-pointer"
+              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-fg/50 border border-fg/10 hover:bg-fg/5 transition-colors cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
+              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-fg transition-opacity disabled:opacity-60 cursor-pointer"
               style={{ backgroundColor: '#3b7ff5' }}
             >
               {loading
