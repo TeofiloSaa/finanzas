@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { seedDefaultCategories } from '@/app/actions/categories'
 import TransaccionesClient from '@/components/transacciones/TransaccionesClient'
-import type { Transaction } from '@/types'
+import type { Transaction, Category } from '@/types'
 
 export const revalidate = 30
 
@@ -20,5 +21,26 @@ export default async function TransaccionesPage() {
     .order('date', { ascending: false })
     .order('created_at', { ascending: false })
 
-  return <TransaccionesClient transactions={(data ?? []) as Transaction[]} />
+  let { data: categories } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: true })
+
+  if (!categories || categories.length === 0) {
+    await seedDefaultCategories(user.id)
+    const reload = await supabase
+      .from('categories')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+    categories = reload.data
+  }
+
+  return (
+    <TransaccionesClient
+      transactions={(data ?? []) as Transaction[]}
+      categories={(categories ?? []) as Category[]}
+    />
+  )
 }

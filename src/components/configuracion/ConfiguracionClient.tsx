@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, DollarSign, LogOut, Check } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { User, DollarSign, LogOut, Check, Tag, Plus, Trash2 } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { logout } from '@/app/actions/auth'
+import { crearCategoria, eliminarCategoria } from '@/app/actions/categories'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
+import type { Category, TransactionType } from '@/types'
 
 const CURRENCY_KEY = 'finanzas.currency'
 const CURRENCIES = [
@@ -13,15 +16,35 @@ const CURRENCIES = [
   { value: 'EUR', label: 'Euro (EUR €)' },
 ]
 
+const PALETTE = [
+  '#ef4444',
+  '#f97316',
+  '#f59e0b',
+  '#eab308',
+  '#22c55e',
+  '#10b981',
+  '#14b8a6',
+  '#06b6d4',
+  '#3b7ff5',
+  '#6366f1',
+  '#8b5cf6',
+  '#a855f7',
+  '#ec4899',
+  '#f43f5e',
+  '#6b7280',
+]
+
 const INPUT_CLASS =
   'rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 border border-white/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
 
 export default function ConfiguracionClient({
   email,
   initialFullName,
+  categories,
 }: {
   email: string
   initialFullName: string
+  categories: Category[]
 }) {
   const formRef = useRef<HTMLFormElement>(null)
   const [savingProfile, setSavingProfile] = useState(false)
@@ -181,6 +204,11 @@ export default function ConfiguracionClient({
         </div>
       </Section>
 
+      {/* Categorías */}
+      <Section title="Categorías" Icon={Tag}>
+        <CategoriasManager categories={categories} />
+      </Section>
+
       {/* Sesión */}
       <Section title="Sesión" Icon={LogOut}>
         <div className="flex items-center justify-between gap-3">
@@ -197,6 +225,224 @@ export default function ConfiguracionClient({
           </button>
         </div>
       </Section>
+    </div>
+  )
+}
+
+function CategoriasManager({ categories }: { categories: Category[] }) {
+  const router = useRouter()
+  const confirm = useConfirm()
+  const [name, setName] = useState('')
+  const [type, setType] = useState<TransactionType>('gasto')
+  const [color, setColor] = useState(PALETTE[0])
+  const [adding, setAdding] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  const gastos = categories.filter((c) => c.type === 'gasto')
+  const ingresos = categories.filter((c) => c.type === 'ingreso')
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault()
+    setError(null)
+    const trimmed = name.trim()
+    if (!trimmed) {
+      setError('Escribí un nombre para la categoría.')
+      return
+    }
+    setAdding(true)
+    const formData = new FormData()
+    formData.set('name', trimmed)
+    formData.set('type', type)
+    formData.set('color', color)
+    const result = await crearCategoria(formData)
+    setAdding(false)
+    if (result?.error) {
+      setError(result.error)
+      return
+    }
+    setName('')
+    setColor(PALETTE[0])
+    router.refresh()
+  }
+
+  async function handleDelete(cat: Category) {
+    const ok = await confirm({
+      title: 'Eliminar categoría',
+      message: `¿Eliminar la categoría "${cat.name}"? Las transacciones existentes no se borran, pero ya no podrás elegirla.`,
+      confirmLabel: 'Eliminar',
+      variant: 'danger',
+    })
+    if (!ok) return
+    setDeletingId(cat.id)
+    const result = await eliminarCategoria(cat.id)
+    setDeletingId(null)
+    if (result?.error) {
+      setError(result.error)
+      return
+    }
+    router.refresh()
+  }
+
+  return (
+    <div className="flex flex-col gap-5">
+      {/* Formulario */}
+      <form onSubmit={handleAdd} className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            maxLength={40}
+            placeholder="Nombre de la categoría"
+            className={INPUT_CLASS}
+            style={{ backgroundColor: '#0f1117' }}
+          />
+          <div
+            className="flex rounded-lg p-1 gap-1 shrink-0"
+            style={{ backgroundColor: '#0f1117' }}
+          >
+            {(['gasto', 'ingreso'] as TransactionType[]).map((t) => {
+              const active = type === t
+              return (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setType(t)}
+                  className="flex-1 sm:flex-none px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer"
+                  style={{
+                    backgroundColor: active ? '#1a1d27' : 'transparent',
+                    color: active
+                      ? t === 'gasto'
+                        ? '#f87171'
+                        : '#4ade80'
+                      : 'rgba(255,255,255,0.35)',
+                  }}
+                >
+                  {t === 'gasto' ? 'Gasto' : 'Ingreso'}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Paleta de colores */}
+        <div className="flex flex-wrap gap-2">
+          {PALETTE.map((c) => {
+            const selected = color === c
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setColor(c)}
+                aria-label={`Color ${c}`}
+                className="h-7 w-7 rounded-full cursor-pointer transition-transform hover:scale-110"
+                style={{
+                  backgroundColor: c,
+                  boxShadow: selected
+                    ? '0 0 0 2px #1a1d27, 0 0 0 4px #fff'
+                    : 'none',
+                }}
+              >
+                {selected && (
+                  <Check
+                    size={14}
+                    strokeWidth={3}
+                    className="mx-auto text-white"
+                  />
+                )}
+              </button>
+            )
+          })}
+        </div>
+
+        {error && (
+          <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={adding}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
+            style={{ backgroundColor: '#3b7ff5' }}
+          >
+            <Plus size={15} strokeWidth={2.5} />
+            {adding ? 'Agregando...' : 'Agregar'}
+          </button>
+        </div>
+      </form>
+
+      {/* Listados */}
+      <CategoryGroup
+        label="Gastos"
+        items={gastos}
+        onDelete={handleDelete}
+        deletingId={deletingId}
+      />
+      <CategoryGroup
+        label="Ingresos"
+        items={ingresos}
+        onDelete={handleDelete}
+        deletingId={deletingId}
+      />
+    </div>
+  )
+}
+
+function CategoryGroup({
+  label,
+  items,
+  onDelete,
+  deletingId,
+}: {
+  label: string
+  items: Category[]
+  onDelete: (cat: Category) => void
+  deletingId: string | null
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-white/35">
+        {label}
+      </h3>
+      {items.length === 0 ? (
+        <p className="text-sm text-white/30">Sin categorías.</p>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {items.map((cat) => (
+            <div
+              key={cat.id}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 border border-white/5"
+              style={{ backgroundColor: '#0f1117' }}
+            >
+              <span
+                className="h-3.5 w-3.5 rounded-full shrink-0"
+                style={{ backgroundColor: cat.color }}
+              />
+              <span className="text-sm text-white flex-1 truncate">
+                {cat.name}
+              </span>
+              {cat.is_default ? (
+                <span className="text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded text-white/40 border border-white/10">
+                  Default
+                </span>
+              ) : (
+                <button
+                  onClick={() => onDelete(cat)}
+                  disabled={deletingId === cat.id}
+                  aria-label={`Eliminar ${cat.name}`}
+                  className="p-1.5 rounded-md text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  <Trash2 size={15} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
-import type { Transaction } from '@/types'
+import type { Transaction, Category } from '@/types'
 import TransaccionFila from './TransaccionFila'
 import NuevaTransaccionModal from './NuevaTransaccionModal'
 
@@ -27,8 +27,10 @@ function formatMonthLabel(yearMonth: string): string {
 
 export default function TransaccionesClient({
   transactions,
+  categories,
 }: {
   transactions: Transaction[]
+  categories: Category[]
 }) {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
@@ -219,6 +221,7 @@ export default function TransaccionesClient({
         <NuevaTransaccionModal
           key={editingTx?.id ?? 'new'}
           transaction={editingTx}
+          categories={categories}
           onClose={handleCloseModal}
           onSuccess={handleSuccess}
         />

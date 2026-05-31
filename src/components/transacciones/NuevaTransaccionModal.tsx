@@ -3,18 +3,19 @@
 import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { crearTransaccion, editarTransaccion } from '@/app/actions/transactions'
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/types'
-import type { Transaction, TransactionType } from '@/types'
+import type { Transaction, TransactionType, Category } from '@/types'
 
 const INPUT_CLASS =
   'rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/30 border border-white/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
 
 export default function NuevaTransaccionModal({
   transaction,
+  categories,
   onClose,
   onSuccess,
 }: {
   transaction?: Transaction | null
+  categories: Category[]
   onClose: () => void
   onSuccess: () => void
 }) {
@@ -27,7 +28,8 @@ export default function NuevaTransaccionModal({
   const [error, setError] = useState<string | null>(null)
 
   const today = new Date().toISOString().split('T')[0]
-  const categories = type === 'gasto' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES
+  const filteredCategories = categories.filter((c) => c.type === type)
+  const categoryNames = filteredCategories.map((c) => c.name)
   const initialCategory = transaction?.category
 
   async function handleSubmit(e: React.FormEvent) {
@@ -160,16 +162,16 @@ export default function NuevaTransaccionModal({
               name="category"
               required
               defaultValue={
-                initialCategory && categories.includes(initialCategory as never)
+                initialCategory && categoryNames.includes(initialCategory)
                   ? initialCategory
-                  : categories[0]
+                  : categoryNames[0]
               }
               className={INPUT_CLASS}
               style={{ backgroundColor: '#0f1117' }}
             >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
+              {filteredCategories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
                 </option>
               ))}
             </select>

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import type { TransactionType, Category } from '@/types'
+import type { TransactionType } from '@/types'
 
 export async function crearTransaccion(formData: FormData) {
   const supabase = await createClient()
@@ -15,7 +15,7 @@ export async function crearTransaccion(formData: FormData) {
 
   const type = formData.get('type') as TransactionType
   const amount = parseFloat(formData.get('amount') as string)
-  const category = formData.get('category') as Category
+  const category = formData.get('category') as string
   const description = ((formData.get('description') as string) ?? '').trim() || null
   const date = formData.get('date') as string
 
@@ -48,7 +48,7 @@ export async function editarTransaccion(id: string, formData: FormData) {
 
   const type = formData.get('type') as TransactionType
   const amount = parseFloat(formData.get('amount') as string)
-  const category = formData.get('category') as Category
+  const category = formData.get('category') as string
   const description = ((formData.get('description') as string) ?? '').trim() || null
   const date = formData.get('date') as string
 

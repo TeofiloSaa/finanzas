@@ -2,43 +2,15 @@ export type TransactionType = 'ingreso' | 'gasto'
 
 export type DebtType = 'prestamo' | 'tarjeta' | 'otro'
 
-export type ExpenseCategory =
-  | 'Comida y super'
-  | 'Transporte'
-  | 'Ropa'
-  | 'Salud'
-  | 'Entretenimiento'
-  | 'Servicios'
-  | 'Educación'
-  | 'Otros'
-
-export type IncomeCategory =
-  | 'Sueldo'
-  | 'Freelance'
-  | 'Inversiones'
-  | 'Regalo'
-  | 'Otros'
-
-export type Category = ExpenseCategory | IncomeCategory
-
-export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
-  'Comida y super',
-  'Transporte',
-  'Ropa',
-  'Salud',
-  'Entretenimiento',
-  'Servicios',
-  'Educación',
-  'Otros',
-]
-
-export const INCOME_CATEGORIES: IncomeCategory[] = [
-  'Sueldo',
-  'Freelance',
-  'Inversiones',
-  'Regalo',
-  'Otros',
-]
+export interface Category {
+  id: string
+  user_id: string
+  name: string
+  type: TransactionType
+  color: string
+  is_default: boolean
+  created_at: string
+}
 
 export interface Profile {
   id: string
@@ -52,7 +24,7 @@ export interface Transaction {
   user_id: string
   type: TransactionType
   amount: number
-  category: Category
+  category: string
   description?: string
   date: string
   created_at: string
