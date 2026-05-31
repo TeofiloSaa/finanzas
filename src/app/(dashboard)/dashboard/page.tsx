@@ -199,7 +199,7 @@ function SummaryCard({
       </div>
       <p
         className="text-xl font-semibold tabular-nums"
-        style={{ color: signed ? color : '#fff' }}
+        style={{ color: signed ? color : 'var(--fg)' }}
       >
         {display}
       </p>

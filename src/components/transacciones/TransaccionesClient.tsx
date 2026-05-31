@@ -152,7 +152,7 @@ export default function TransaccionesClient({
                 backgroundColor:
                   filterType === t ? 'var(--background)' : 'transparent',
                 color:
-                  filterType === t ? '#fff' : 'var(--muted)',
+                  filterType === t ? 'var(--fg)' : 'var(--muted)',
               }}
             >
               {TYPE_LABELS[t]}
