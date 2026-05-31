@@ -1,6 +1,9 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { seedDefaultCategories } from '@/app/actions/categories'
+import {
+  seedDefaultCategories,
+  limpiarCategoriasDuplicadas,
+} from '@/app/actions/categories'
 import ConfiguracionClient from '@/components/configuracion/ConfiguracionClient'
 import type { Category } from '@/types'
 
@@ -20,10 +23,14 @@ export default async function ConfiguracionPage() {
     .eq('id', user.id)
     .maybeSingle()
 
+  // Repara estados previos con categorías duplicadas antes de leer.
+  await limpiarCategoriasDuplicadas(user.id)
+
   let { data: categories } = await supabase
     .from('categories')
     .select('*')
     .eq('user_id', user.id)
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
 
   if (!categories || categories.length === 0) {
@@ -32,6 +39,7 @@ export default async function ConfiguracionPage() {
       .from('categories')
       .select('*')
       .eq('user_id', user.id)
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
     categories = reload.data
   }

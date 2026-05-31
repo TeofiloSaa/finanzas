@@ -8,8 +8,13 @@ create table if not exists public.categories (
   type text not null check (type in ('ingreso', 'gasto')),
   color text not null,
   is_default boolean not null default false,
+  sort_order integer not null default 0,
   created_at timestamptz not null default now()
 );
+
+-- Si la tabla ya existía sin la columna, agregarla:
+alter table public.categories
+  add column if not exists sort_order integer default 0;
 
 -- Evita duplicados del mismo nombre + tipo para un mismo usuario.
 create unique index if not exists categories_user_name_type_uidx

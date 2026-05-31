@@ -2,10 +2,24 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { User, DollarSign, LogOut, Check, Tag, Plus, Trash2 } from 'lucide-react'
+import {
+  User,
+  DollarSign,
+  LogOut,
+  Check,
+  Tag,
+  Plus,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+} from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { logout } from '@/app/actions/auth'
-import { crearCategoria, eliminarCategoria } from '@/app/actions/categories'
+import {
+  crearCategoria,
+  eliminarCategoria,
+  reordenarCategoria,
+} from '@/app/actions/categories'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
 import type { Category, TransactionType } from '@/types'
 
@@ -238,6 +252,7 @@ function CategoriasManager({ categories }: { categories: Category[] }) {
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [busyId, setBusyId] = useState<string | null>(null)
 
   const gastos = categories.filter((c) => c.type === 'gasto')
   const ingresos = categories.filter((c) => c.type === 'ingreso')
@@ -277,6 +292,18 @@ function CategoriasManager({ categories }: { categories: Category[] }) {
     setDeletingId(cat.id)
     const result = await eliminarCategoria(cat.id)
     setDeletingId(null)
+    if (result?.error) {
+      setError(result.error)
+      return
+    }
+    router.refresh()
+  }
+
+  async function handleReorder(cat: Category, direction: 'up' | 'down') {
+    setError(null)
+    setBusyId(cat.id)
+    const result = await reordenarCategoria(cat.id, direction)
+    setBusyId(null)
     if (result?.error) {
       setError(result.error)
       return
@@ -380,13 +407,17 @@ function CategoriasManager({ categories }: { categories: Category[] }) {
         label="Gastos"
         items={gastos}
         onDelete={handleDelete}
+        onReorder={handleReorder}
         deletingId={deletingId}
+        busyId={busyId}
       />
       <CategoryGroup
         label="Ingresos"
         items={ingresos}
         onDelete={handleDelete}
+        onReorder={handleReorder}
         deletingId={deletingId}
+        busyId={busyId}
       />
     </div>
   )
@@ -396,12 +427,16 @@ function CategoryGroup({
   label,
   items,
   onDelete,
+  onReorder,
   deletingId,
+  busyId,
 }: {
   label: string
   items: Category[]
   onDelete: (cat: Category) => void
+  onReorder: (cat: Category, direction: 'up' | 'down') => void
   deletingId: string | null
+  busyId: string | null
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -412,7 +447,7 @@ function CategoryGroup({
         <p className="text-sm text-white/30">Sin categorías.</p>
       ) : (
         <div className="flex flex-col gap-1.5">
-          {items.map((cat) => (
+          {items.map((cat, i) => (
             <div
               key={cat.id}
               className="flex items-center gap-3 rounded-lg px-3 py-2 border border-white/5"
@@ -430,14 +465,32 @@ function CategoryGroup({
                   Default
                 </span>
               ) : (
-                <button
-                  onClick={() => onDelete(cat)}
-                  disabled={deletingId === cat.id}
-                  aria-label={`Eliminar ${cat.name}`}
-                  className="p-1.5 rounded-md text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  <Trash2 size={15} />
-                </button>
+                <div className="flex items-center gap-0.5 shrink-0">
+                  <button
+                    onClick={() => onReorder(cat, 'up')}
+                    disabled={i === 0 || busyId === cat.id}
+                    aria-label={`Subir ${cat.name}`}
+                    className="p-1.5 rounded-md text-white/30 hover:text-white hover:bg-white/8 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  >
+                    <ChevronUp size={15} />
+                  </button>
+                  <button
+                    onClick={() => onReorder(cat, 'down')}
+                    disabled={i === items.length - 1 || busyId === cat.id}
+                    aria-label={`Bajar ${cat.name}`}
+                    className="p-1.5 rounded-md text-white/30 hover:text-white hover:bg-white/8 transition-colors cursor-pointer disabled:opacity-25 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                  >
+                    <ChevronDown size={15} />
+                  </button>
+                  <button
+                    onClick={() => onDelete(cat)}
+                    disabled={deletingId === cat.id}
+                    aria-label={`Eliminar ${cat.name}`}
+                    className="p-1.5 rounded-md text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
               )}
             </div>
           ))}

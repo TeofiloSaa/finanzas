@@ -25,6 +25,7 @@ export default async function TransaccionesPage() {
     .from('categories')
     .select('*')
     .eq('user_id', user.id)
+    .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
 
   if (!categories || categories.length === 0) {
@@ -33,6 +34,7 @@ export default async function TransaccionesPage() {
       .from('categories')
       .select('*')
       .eq('user_id', user.id)
+      .order('sort_order', { ascending: true })
       .order('created_at', { ascending: true })
     categories = reload.data
   }
