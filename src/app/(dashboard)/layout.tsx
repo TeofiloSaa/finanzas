@@ -1,6 +1,7 @@
 import Sidebar from '@/components/ui/Sidebar'
 import BottomNav from '@/components/ui/BottomNav'
 import ConfirmProvider from '@/components/ui/ConfirmProvider'
+import InstallBanner from '@/components/ui/InstallBanner'
 
 export default function DashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default function DashboardLayout({
           {children}
         </main>
         <BottomNav />
+        <InstallBanner />
       </div>
     </ConfirmProvider>
   )
