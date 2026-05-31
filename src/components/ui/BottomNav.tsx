@@ -18,6 +18,7 @@ export default function BottomNav() {
           <Link
             key={href}
             href={href}
+            prefetch
             className="flex flex-col items-center justify-center gap-1 flex-1 py-3 text-xs font-medium transition-colors"
             style={{ color: active ? '#3b7ff5' : 'rgba(255,255,255,0.45)' }}
           >

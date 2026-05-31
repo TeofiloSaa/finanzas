@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import ConfiguracionClient from '@/components/configuracion/ConfiguracionClient'
 
+export const revalidate = 30
+
 export default async function ConfiguracionPage() {
   const supabase = await createClient()
   const {

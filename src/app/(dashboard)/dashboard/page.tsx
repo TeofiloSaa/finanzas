@@ -7,6 +7,8 @@ import GastosDonut from '@/components/dashboard/GastosDonut'
 import IngresosGastosBar from '@/components/dashboard/IngresosGastosBar'
 import type { Transaction, SavingsGoal, Debt } from '@/types'
 
+export const revalidate = 30
+
 const MONTHS_ES_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 const MONTHS_ES_LONG = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 

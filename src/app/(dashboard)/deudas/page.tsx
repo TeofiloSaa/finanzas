@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import DeudasClient from '@/components/deudas/DeudasClient'
 import type { Debt } from '@/types'
 
+export const revalidate = 30
+
 export default async function DeudasPage() {
   const supabase = await createClient()
   const {

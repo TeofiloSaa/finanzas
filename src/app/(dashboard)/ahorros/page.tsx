@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import AhorrosClient from '@/components/ahorros/AhorrosClient'
 import type { SavingsGoal } from '@/types'
 
+export const revalidate = 30
+
 export default async function AhorrosPage() {
   const supabase = await createClient()
   const {

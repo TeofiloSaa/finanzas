@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import TransaccionesClient from '@/components/transacciones/TransaccionesClient'
 import type { Transaction } from '@/types'
 
+export const revalidate = 30
+
 export default async function TransaccionesPage() {
   const supabase = await createClient()
   const {
