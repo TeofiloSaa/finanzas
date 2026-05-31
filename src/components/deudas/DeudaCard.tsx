@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Trash2, Check, CreditCard, Banknote, Receipt, CalendarClock } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { eliminarDeuda, pagarCuota } from '@/app/actions/debts'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 import type { Debt, DebtType } from '@/types'
 
 const TYPE_META: Record<DebtType, { label: string; Icon: typeof CreditCard }> = {
@@ -55,6 +56,7 @@ export default function DeudaCard({
   onChanged: () => void
 }) {
   const [busy, setBusy] = useState<'delete' | 'pay' | null>(null)
+  const confirm = useConfirm()
 
   const total = Number(debt.total_amount)
   const installmentAmount = Number(debt.installment_amount)
@@ -71,7 +73,13 @@ export default function DeudaCard({
   const { label: typeLabel, Icon: TypeIcon } = TYPE_META[debt.type]
 
   async function handleDelete() {
-    if (!window.confirm(`¿Eliminar la deuda "${debt.name}"?`)) return
+    const ok = await confirm({
+      title: 'Eliminar deuda',
+      message: `¿Seguro que querés eliminar la deuda "${debt.name}"?`,
+      confirmLabel: 'Eliminar',
+      variant: 'danger',
+    })
+    if (!ok) return
     setBusy('delete')
     await eliminarDeuda(debt.id)
     onChanged()

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ArrowDownLeft, ArrowUpRight, Trash2, Pencil } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { eliminarTransaccion } from '@/app/actions/transactions'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 import type { Transaction } from '@/types'
 
 export default function TransaccionFila({
@@ -18,6 +19,7 @@ export default function TransaccionFila({
   isLast: boolean
 }) {
   const [deleting, setDeleting] = useState(false)
+  const confirm = useConfirm()
 
   const isIngreso = t.type === 'ingreso'
   const Icon = isIngreso ? ArrowDownLeft : ArrowUpRight
@@ -26,7 +28,13 @@ export default function TransaccionFila({
   const amountColor = isIngreso ? '#4ade80' : '#f87171'
 
   async function handleDelete() {
-    if (!window.confirm('¿Eliminar esta transacción?')) return
+    const ok = await confirm({
+      title: 'Eliminar transacción',
+      message: '¿Seguro que querés eliminar esta transacción?',
+      confirmLabel: 'Eliminar',
+      variant: 'danger',
+    })
+    if (!ok) return
     setDeleting(true)
     await eliminarTransaccion(t.id)
     onDeleted()
@@ -82,7 +90,7 @@ export default function TransaccionFila({
         <button
           onClick={() => onEdit(t)}
           disabled={deleting}
-          className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-white/25 hover:text-[#3b7ff5] hover:bg-[#3b7ff5]/10 transition-all cursor-pointer disabled:cursor-not-allowed"
+          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-white/25 hover:text-[#3b7ff5] hover:bg-[#3b7ff5]/10 transition-all cursor-pointer disabled:cursor-not-allowed"
           aria-label="Editar transacción"
         >
           <Pencil size={14} strokeWidth={1.75} />
@@ -90,7 +98,7 @@ export default function TransaccionFila({
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer disabled:cursor-not-allowed"
+          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-white/25 hover:text-red-400 hover:bg-red-500/10 transition-all cursor-pointer disabled:cursor-not-allowed"
           aria-label="Eliminar transacción"
         >
           <Trash2 size={14} strokeWidth={1.75} />

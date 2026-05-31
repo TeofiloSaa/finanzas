@@ -42,7 +42,7 @@ export default function NuevaMetaModal({
       onClick={handleBackdropClick}
     >
       <div
-        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border-t sm:border border-white/10 p-6"
+        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border-t sm:border border-white/10 px-6 pt-6 pb-24 sm:pb-6"
         style={{ backgroundColor: '#1a1d27' }}
       >
         <div className="flex items-center justify-between mb-5">

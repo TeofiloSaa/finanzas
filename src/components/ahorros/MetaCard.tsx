@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Trash2, Plus, Calendar, Check } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { eliminarMeta } from '@/app/actions/savings'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 import type { SavingsGoal } from '@/types'
 
 function daysUntil(deadline: string): number {
@@ -25,6 +26,7 @@ export default function MetaCard({
   onDeleted: () => void
 }) {
   const [deleting, setDeleting] = useState(false)
+  const confirm = useConfirm()
 
   const current = Number(goal.current_amount)
   const target = Number(goal.target_amount)
@@ -38,7 +40,13 @@ export default function MetaCard({
   const barColor = goal.completed ? '#4ade80' : '#3b7ff5'
 
   async function handleDelete() {
-    if (!window.confirm(`¿Eliminar la meta "${goal.name}"?`)) return
+    const ok = await confirm({
+      title: 'Eliminar meta',
+      message: `¿Seguro que querés eliminar la meta "${goal.name}"?`,
+      confirmLabel: 'Eliminar',
+      variant: 'danger',
+    })
+    if (!ok) return
     setDeleting(true)
     await eliminarMeta(goal.id)
     onDeleted()

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { User, DollarSign, LogOut, Check } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { logout } from '@/app/actions/auth'
+import { useConfirm } from '@/components/ui/ConfirmProvider'
 
 const CURRENCY_KEY = 'finanzas.currency'
 const CURRENCIES = [
@@ -32,6 +33,7 @@ export default function ConfiguracionClient({
   const [currency, setCurrency] = useState('ARS')
   const [currencySaved, setCurrencySaved] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
+  const confirm = useConfirm()
 
   useEffect(() => {
     const stored = localStorage.getItem(CURRENCY_KEY)
@@ -60,7 +62,12 @@ export default function ConfiguracionClient({
   }
 
   async function handleLogout() {
-    if (!window.confirm('¿Cerrar sesión?')) return
+    const ok = await confirm({
+      title: 'Cerrar sesión',
+      message: '¿Querés cerrar la sesión en este dispositivo?',
+      confirmLabel: 'Cerrar sesión',
+    })
+    if (!ok) return
     setLoggingOut(true)
     await logout()
   }
