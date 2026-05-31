@@ -15,6 +15,7 @@ import {
   Palette,
   Sun,
   Moon,
+  Download,
 } from 'lucide-react'
 import { updateProfile } from '@/app/actions/profile'
 import { logout } from '@/app/actions/auth'
@@ -23,6 +24,7 @@ import {
   eliminarCategoria,
   reordenarCategoria,
 } from '@/app/actions/categories'
+import { exportarCSV, type ExportDataset } from '@/app/actions/export'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
 import { useTheme, type Theme } from '@/components/ui/ThemeProvider'
 import type { Category, TransactionType } from '@/types'
@@ -261,6 +263,11 @@ export default function ConfiguracionClient({
       {/* Categorías */}
       <Section title="Categorías" Icon={Tag}>
         <CategoriasManager categories={categories} />
+      </Section>
+
+      {/* Datos */}
+      <Section title="Datos" Icon={Download}>
+        <ExportData />
       </Section>
 
       {/* Sesión */}
@@ -535,6 +542,71 @@ function CategoryGroup({
             </div>
           ))}
         </div>
+      )}
+    </div>
+  )
+}
+
+function ExportData() {
+  const [busy, setBusy] = useState<ExportDataset | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const datasets: { key: ExportDataset; label: string }[] = [
+    { key: 'transacciones', label: 'Transacciones' },
+    { key: 'ahorros', label: 'Ahorros' },
+    { key: 'deudas', label: 'Deudas' },
+  ]
+
+  async function handleExport(dataset: ExportDataset) {
+    setError(null)
+    setBusy(dataset)
+    try {
+      const result = await exportarCSV(dataset)
+      if ('error' in result) {
+        setError(result.error)
+        return
+      }
+      const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = result.filename
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(url)
+    } catch {
+      setError('No se pudo generar el archivo. Intentá de nuevo.')
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-fg/50">
+        Descargá tus datos en formato CSV, listos para abrir en Excel o Google
+        Sheets.
+      </p>
+      <div className="flex flex-col sm:flex-row gap-2">
+        {datasets.map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => handleExport(key)}
+            disabled={busy !== null}
+            className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-medium text-fg border border-fg/10 hover:bg-fg/5 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            style={{ backgroundColor: 'var(--background)' }}
+          >
+            <Download size={14} strokeWidth={2} />
+            {busy === key ? 'Generando...' : label}
+          </button>
+        ))}
+      </div>
+      {error && (
+        <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+          {error}
+        </p>
       )}
     </div>
   )
