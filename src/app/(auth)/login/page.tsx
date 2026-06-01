@@ -62,7 +62,7 @@ function LoginCard() {
             marginTop: '12px',
           }}
         >
-          Bienvenido de vuelta
+          Bienvenido
         </h2>
         <p style={{ fontSize: '13px', color: '#4a5270', marginTop: '6px' }}>
           Ingresá a tu cuenta de Finanzas
