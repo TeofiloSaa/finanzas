@@ -18,6 +18,11 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Finanzas',
   },
+  // El equivalente moderno de apple-mobile-web-app-capable para Android/Chrome.
+  // Metadata no tiene un campo dedicado, así que lo agregamos como meta crudo.
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
   icons: {
     icon: [
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -28,7 +33,8 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: 'var(--background)',
+  // theme-color debe ser un color real: un var() de CSS lo ignora el navegador.
+  themeColor: '#0f1117',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',

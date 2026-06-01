@@ -7,9 +7,25 @@ export default function SWRegister() {
     if (typeof window === 'undefined') return
     if (!('serviceWorker' in navigator)) return
 
-    navigator.serviceWorker.register('/sw.js').catch((err) => {
-      console.warn('SW registration failed:', err)
-    })
+    // Registramos recién cuando la página terminó de cargar para no competir
+    // con los recursos críticos del primer render.
+    const register = () => {
+      navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
+        .then((reg) => {
+          console.info('SW registrado, scope:', reg.scope)
+        })
+        .catch((err) => {
+          console.warn('Fallo el registro del SW:', err)
+        })
+    }
+
+    if (document.readyState === 'complete') {
+      register()
+    } else {
+      window.addEventListener('load', register, { once: true })
+      return () => window.removeEventListener('load', register)
+    }
   }, [])
 
   return null

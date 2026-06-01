@@ -58,6 +58,10 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Excluimos los assets de la PWA (manifest.json y sw.js) además de los
+    // estáticos: si el middleware los interceptara, redirigiría a /login y
+    // (a) Chrome no detectaría el manifest y (b) el registro del service worker
+    // fallaría por venir detrás de un redirect.
+    '/((?!_next/static|_next/image|favicon\\.ico|manifest\\.json|sw\\.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
