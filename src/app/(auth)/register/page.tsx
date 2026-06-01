@@ -6,10 +6,21 @@ import { register } from '@/app/actions/auth'
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(formData: FormData) {
     setError(null)
+    setPasswordError(null)
+
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirm_password') as string
+
+    if (password !== confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden')
+      return
+    }
+
     setLoading(true)
     const result = await register(formData)
     if (result?.error) {
@@ -43,6 +54,22 @@ export default function RegisterPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
+          <label htmlFor="full_name" className="text-sm text-fg/70 font-medium">
+            Nombre completo
+          </label>
+          <input
+            id="full_name"
+            name="full_name"
+            type="text"
+            required
+            maxLength={120}
+            placeholder="Tu nombre"
+            className="rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors"
+            style={{ backgroundColor: 'var(--background)' }}
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
           <label
             htmlFor="password"
             className="text-sm text-fg/70 font-medium"
@@ -59,6 +86,28 @@ export default function RegisterPage() {
             className="rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors"
             style={{ backgroundColor: 'var(--background)' }}
           />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="confirm_password"
+            className="text-sm text-fg/70 font-medium"
+          >
+            Confirmar contraseña
+          </label>
+          <input
+            id="confirm_password"
+            name="confirm_password"
+            type="password"
+            required
+            placeholder="••••••••"
+            minLength={6}
+            className="rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors"
+            style={{ backgroundColor: 'var(--background)' }}
+          />
+          {passwordError && (
+            <p className="text-sm text-red-400 mt-0.5">{passwordError}</p>
+          )}
         </div>
 
         {error && (
