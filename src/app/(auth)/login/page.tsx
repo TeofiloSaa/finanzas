@@ -20,68 +20,120 @@ export default function LoginPage() {
 
   return (
     <div
-      className="w-full max-w-sm rounded-2xl border border-fg/8 p-8"
-      style={{ backgroundColor: 'var(--surface)' }}
+      className="w-full max-w-sm overflow-hidden"
+      style={{
+        backgroundColor: '#0f1117',
+        border: '1px solid #1e2130',
+        borderRadius: '16px',
+      }}
     >
-      <h1 className="text-xl font-semibold text-fg mb-1">Iniciar sesión</h1>
-      <p className="text-sm text-fg/50 mb-6">Ingresá a tu cuenta de Finanzas</p>
+      {/* Sección superior */}
+      <div style={{ padding: '32px 28px' }}>
+        <div
+          style={{
+            width: '32px',
+            height: '2px',
+            backgroundColor: '#3b7ff5',
+            borderRadius: '2px',
+            marginBottom: '24px',
+          }}
+        />
 
-      <form action={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-sm text-fg/70 font-medium">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            placeholder="tu@email.com"
-            className="rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors"
-            style={{ backgroundColor: 'var(--background)' }}
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="password"
-            className="text-sm text-fg/70 font-medium"
-          >
-            Contraseña
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            placeholder="••••••••"
-            className="rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors"
-            style={{ backgroundColor: 'var(--background)' }}
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-1 rounded-lg py-2.5 text-sm font-medium text-fg transition-opacity disabled:opacity-60 cursor-pointer"
-          style={{ backgroundColor: '#3b7ff5' }}
+        <p
+          className="uppercase"
+          style={{
+            fontSize: '11px',
+            letterSpacing: '0.15em',
+            color: '#3b7ff5',
+          }}
         >
-          {loading ? 'Ingresando...' : 'Ingresar'}
-        </button>
-      </form>
+          Finanzas
+        </p>
 
-      <p className="text-center text-sm text-fg/50 mt-6">
+        <h2
+          style={{
+            fontSize: '26px',
+            fontWeight: 500,
+            color: '#f0f2ff',
+            letterSpacing: '-0.3px',
+            marginTop: '12px',
+          }}
+        >
+          Bienvenido de vuelta
+        </h2>
+        <p style={{ fontSize: '13px', color: '#4a5270', marginTop: '6px' }}>
+          Ingresá a tu cuenta de Finanzas
+        </p>
+
+        <form action={handleSubmit} className="flex flex-col gap-4 mt-7">
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium"
+              style={{ color: '#8a92b2' }}
+            >
+              Email
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="tu@email.com"
+              className="rounded-lg px-3 py-2.5 text-sm outline-none transition-all bg-[#161b2e] border border-[#1e2540] text-[#f0f2ff] placeholder-[#2e3555] focus:border-[#3b7ff5] focus:shadow-[0_0_0_3px_rgba(59,127,245,0.15)]"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium"
+              style={{ color: '#8a92b2' }}
+            >
+              Contraseña
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              required
+              placeholder="••••••••"
+              className="rounded-lg px-3 py-2.5 text-sm outline-none transition-all bg-[#161b2e] border border-[#1e2540] text-[#f0f2ff] placeholder-[#2e3555] focus:border-[#3b7ff5] focus:shadow-[0_0_0_3px_rgba(59,127,245,0.15)]"
+            />
+          </div>
+
+          {error && (
+            <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-1 rounded-lg py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
+            style={{ backgroundColor: '#3b7ff5' }}
+          >
+            {loading ? 'Ingresando...' : 'Ingresar'}
+          </button>
+        </form>
+      </div>
+
+      {/* Footer del card */}
+      <div
+        className="text-center text-sm"
+        style={{
+          borderTop: '1px solid #161b2e',
+          backgroundColor: '#0b0e18',
+          padding: '16px 28px',
+          color: '#2e3555',
+        }}
+      >
         ¿No tenés cuenta?{' '}
-        <Link href="/register" className="text-[#3b7ff5] hover:underline">
+        <Link href="/register" style={{ color: '#3b7ff5' }} className="hover:underline">
           Registrate
         </Link>
-      </p>
+      </div>
     </div>
   )
 }
