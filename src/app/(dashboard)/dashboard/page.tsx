@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import GastosDonut from '@/components/dashboard/GastosDonut'
 import IngresosGastosBar from '@/components/dashboard/IngresosGastosBar'
+import PatrimonioChart from '@/components/dashboard/PatrimonioChart'
 import type { Transaction, SavingsGoal, Debt } from '@/types'
 
 export const revalidate = 30
@@ -51,13 +52,18 @@ export default async function DashboardPage() {
   const startStr = toDateString(sixMonthsStart)
   const endStr = toDateString(nextMonthStart)
 
-  const [txRes, goalsRes, debtsRes] = await Promise.all([
+  const [txRes, allTxRes, goalsRes, debtsRes] = await Promise.all([
     supabase
       .from('transactions')
       .select('*')
       .eq('user_id', user.id)
       .gte('date', startStr)
       .lt('date', endStr),
+    // Todas las transacciones (sin filtro de fecha) para el patrimonio acumulado
+    supabase
+      .from('transactions')
+      .select('date, type, amount')
+      .eq('user_id', user.id),
     supabase
       .from('savings_goals')
       .select('*')
@@ -115,6 +121,43 @@ export default async function DashboardPage() {
     })
   }
 
+  // --- Patrimonio neto acumulado: últimos 12 meses ---
+  // Net firmado por transacción: ingreso suma, gasto resta.
+  // El patrimonio de un mes = acumulado de TODO hasta el fin de ese mes.
+  type TxLite = { date: string; type: Transaction['type']; amount: number }
+  const allTx = (allTxRes.data ?? []) as TxLite[]
+
+  const windowStartStr = toDateString(new Date(currentYear, currentMonth - 11, 1))
+  const mesesConDatos = new Set<string>()
+  let baseline = 0 // acumulado de meses anteriores a la ventana
+  const netByMonth = new Map<string, number>()
+
+  for (const t of allTx) {
+    const amt = t.type === 'ingreso' ? Number(t.amount) : -Number(t.amount)
+    mesesConDatos.add(t.date.slice(0, 7))
+    if (t.date < windowStartStr) {
+      baseline += amt
+      continue
+    }
+    const prefix = t.date.slice(0, 7) // YYYY-MM
+    netByMonth.set(prefix, (netByMonth.get(prefix) ?? 0) + amt)
+  }
+
+  let running = baseline
+  const patrimonioData: { month: string; patrimonio: number }[] = []
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(currentYear, currentMonth - 11 + i, 1)
+    const prefix = `${d.getFullYear()}-${pad(d.getMonth() + 1)}`
+    running += netByMonth.get(prefix) ?? 0
+    patrimonioData.push({
+      month: `${MONTHS_ES_SHORT[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`,
+      patrimonio: running,
+    })
+  }
+
+  // El componente muestra empty state con menos de 2 puntos.
+  const patrimonioChartData = mesesConDatos.size < 2 ? [] : patrimonioData
+
   const tituloMes = `${MONTHS_ES_LONG[currentMonth]} ${currentYear}`
 
   return (
@@ -156,6 +199,11 @@ export default async function DashboardPage() {
       {/* Barras */}
       <Section title="Ingresos vs Gastos" subtitle="Últimos 6 meses">
         <IngresosGastosBar data={barData} />
+      </Section>
+
+      {/* Patrimonio neto */}
+      <Section title="Evolución del patrimonio" subtitle="Últimos 12 meses">
+        <PatrimonioChart data={patrimonioChartData} />
       </Section>
 
       {/* Widgets */}

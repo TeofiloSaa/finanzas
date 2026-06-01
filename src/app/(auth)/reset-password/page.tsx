@@ -1,24 +1,41 @@
 'use client'
 
-import { Suspense, useState } from 'react'
-import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
-import { login } from '@/app/actions/auth'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 
-function LoginCard() {
-  const searchParams = useSearchParams()
-  const resetDone = searchParams.get('reset') === 'success'
+export default function ResetPasswordPage() {
+  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  const inputClass =
+    'rounded-lg px-3 py-2.5 text-sm outline-none transition-all bg-[#161b2e] border border-[#1e2540] text-[#f0f2ff] placeholder-[#2e3555] focus:border-[#3b7ff5] focus:shadow-[0_0_0_3px_rgba(59,127,245,0.15)]'
 
   async function handleSubmit(formData: FormData) {
     setError(null)
-    setLoading(true)
-    const result = await login(formData)
-    if (result?.error) {
-      setError(result.error)
-      setLoading(false)
+    setPasswordError(null)
+
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirm_password') as string
+
+    if (password !== confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden')
+      return
     }
+
+    setLoading(true)
+    const supabase = createClient()
+    const { error } = await supabase.auth.updateUser({ password })
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return
+    }
+
+    router.push('/login?reset=success')
   }
 
   return (
@@ -62,60 +79,52 @@ function LoginCard() {
             marginTop: '12px',
           }}
         >
-          Bienvenido de vuelta
+          Nueva contraseña
         </h2>
         <p style={{ fontSize: '13px', color: '#4a5270', marginTop: '6px' }}>
-          Ingresá a tu cuenta de Finanzas
+          Elegí una contraseña nueva para tu cuenta
         </p>
 
-        {resetDone && (
-          <p
-            className="text-sm rounded-lg px-3 py-2.5 mt-6"
-            style={{
-              color: '#7dd3a8',
-              backgroundColor: 'rgba(61,191,122,0.1)',
-              border: '1px solid rgba(61,191,122,0.2)',
-            }}
-          >
-            Contraseña actualizada, podés ingresar
-          </p>
-        )}
-
         <form action={handleSubmit} className="flex flex-col gap-4 mt-7">
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium"
-              style={{ color: '#8a92b2' }}
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              placeholder="tu@email.com"
-              className="rounded-lg px-3 py-2.5 text-sm outline-none transition-all bg-[#161b2e] border border-[#1e2540] text-[#f0f2ff] placeholder-[#2e3555] focus:border-[#3b7ff5] focus:shadow-[0_0_0_3px_rgba(59,127,245,0.15)]"
-            />
-          </div>
-
           <div className="flex flex-col gap-1.5">
             <label
               htmlFor="password"
               className="text-sm font-medium"
               style={{ color: '#8a92b2' }}
             >
-              Contraseña
+              Nueva contraseña
             </label>
             <input
               id="password"
               name="password"
               type="password"
               required
+              minLength={6}
               placeholder="••••••••"
-              className="rounded-lg px-3 py-2.5 text-sm outline-none transition-all bg-[#161b2e] border border-[#1e2540] text-[#f0f2ff] placeholder-[#2e3555] focus:border-[#3b7ff5] focus:shadow-[0_0_0_3px_rgba(59,127,245,0.15)]"
+              className={inputClass}
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="confirm_password"
+              className="text-sm font-medium"
+              style={{ color: '#8a92b2' }}
+            >
+              Confirmar contraseña
+            </label>
+            <input
+              id="confirm_password"
+              name="confirm_password"
+              type="password"
+              required
+              minLength={6}
+              placeholder="••••••••"
+              className={inputClass}
+            />
+            {passwordError && (
+              <p className="text-sm text-red-400 mt-0.5">{passwordError}</p>
+            )}
           </div>
 
           {error && (
@@ -130,16 +139,8 @@ function LoginCard() {
             className="mt-1 rounded-lg py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
             style={{ backgroundColor: '#3b7ff5' }}
           >
-            {loading ? 'Ingresando...' : 'Ingresar'}
+            {loading ? 'Guardando...' : 'Guardar contraseña'}
           </button>
-
-          <Link
-            href="/forgot-password"
-            className="text-center text-sm hover:underline"
-            style={{ color: '#3b7ff5' }}
-          >
-            ¿Olvidaste tu contraseña?
-          </Link>
         </form>
       </div>
 
@@ -153,19 +154,11 @@ function LoginCard() {
           color: '#2e3555',
         }}
       >
-        ¿No tenés cuenta?{' '}
-        <Link href="/register" style={{ color: '#3b7ff5' }} className="hover:underline">
-          Registrate
-        </Link>
+        ¿Ya la recordaste?{' '}
+        <a href="/login" style={{ color: '#3b7ff5' }} className="hover:underline">
+          Iniciá sesión
+        </a>
       </div>
     </div>
-  )
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginCard />
-    </Suspense>
   )
 }

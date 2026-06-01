@@ -38,6 +38,21 @@ export async function register(formData: FormData) {
   redirect('/dashboard')
 }
 
+export async function forgotPassword(formData: FormData) {
+  const email = formData.get('email') as string
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://finanzas-sand-nu.vercel.app/reset-password',
+  })
+
+  if (error) {
+    return { error: error.message }
+  }
+
+  return { success: true }
+}
+
 export async function logout() {
   const supabase = await createClient()
   await supabase.auth.signOut()
