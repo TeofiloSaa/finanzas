@@ -132,15 +132,15 @@ function LoginCard() {
           >
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
-
-          <Link
-            href="/forgot-password"
-            className="text-center text-sm hover:underline"
-            style={{ color: '#3b7ff5' }}
-          >
-            ¿Olvidaste tu contraseña?
-          </Link>
         </form>
+
+        <Link
+          href="/forgot-password"
+          className="block text-center text-sm hover:underline mt-4"
+          style={{ color: '#3b7ff5' }}
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
       </div>
 
       {/* Footer del card */}
