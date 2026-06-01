@@ -4,56 +4,33 @@ import { mkdir } from 'node:fs/promises'
 const BG = '#0f1117'
 const ACCENT = '#3b7ff5'
 
-// Construye el SVG de un gráfico de línea ascendente (sparkline) sobre fondo
-// cuadrado. No depende de fuentes del sistema, así el resultado es idéntico en
-// cualquier máquina.
-//   points     → array de [x, y] en el viewBox 0..512
-//   stroke     → grosor del trazo
-//   radius     → radio de las esquinas del fondo (0 = sin redondear)
-//   fullBleed  → si true, el fondo ocupa todo el lienzo (para maskable)
-function buildSvg({ points, stroke, radius }) {
-  const path = points.map(([x, y]) => `${x},${y}`).join(' ')
-  const [lastX, lastY] = points[points.length - 1]
+// Monograma "F" serif (Georgia) centrado sobre fondo cuadrado.
+// OJO: renderizar texto depende de que la fuente esté instalada en el sistema
+// que corre el script (Georgia existe en Windows/macOS). Si se genera en un CI
+// sin Georgia, librsvg cae a otra serif.
+//   fontSize → tamaño de la letra en el viewBox 0..512
+//   radius   → radio de las esquinas del fondo (0 = sin redondear, para maskable)
+function buildSvg({ fontSize, radius }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="${BG}" rx="${radius}"/>
-  <polyline
-    points="${path}"
-    fill="none"
-    stroke="${ACCENT}"
-    stroke-width="${stroke}"
-    stroke-linecap="round"
-    stroke-linejoin="round"/>
-  <circle cx="${lastX}" cy="${lastY}" r="${stroke * 0.9}" fill="${ACCENT}"/>
+  <text
+    x="256"
+    y="256"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="${fontSize}"
+    font-weight="700"
+    fill="${ACCENT}"
+    text-anchor="middle"
+    dominant-baseline="central">F</text>
 </svg>`
 }
 
-// Ícono normal: la línea usa casi todo el lienzo (con un margen cómodo).
-const REGULAR = buildSvg({
-  points: [
-    [108, 340],
-    [196, 282],
-    [272, 312],
-    [344, 214],
-    [404, 160],
-  ],
-  stroke: 30,
-  radius: 80,
-})
+// Ícono normal: F grande (~54%) con esquinas redondeadas (~15.6% del lado).
+const REGULAR = buildSvg({ fontSize: 276, radius: 80 })
 
-// Maskable: Android recorta hasta el ~10% de cada borde y aplica su propia
-// máscara. El fondo ocupa todo el lienzo (sin esquinas redondeadas) y la línea
-// se encoge hacia el centro para quedar dentro de la "safe zone".
-const MASKABLE = buildSvg({
-  points: [
-    [152, 314],
-    [213, 273],
-    [268, 296],
-    [319, 227],
-    [360, 192],
-  ],
-  stroke: 22,
-  radius: 0,
-})
+// Maskable: fondo a sangre (sin rx, lo enmascara Android) y F más chica (~40%)
+// para que entre en la safe zone tras el recorte de ~10% por borde.
+const MASKABLE = buildSvg({ fontSize: 205, radius: 0 })
 
 const OUT_DIR = 'public/icons'
 await mkdir(OUT_DIR, { recursive: true })
