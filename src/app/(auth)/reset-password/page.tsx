@@ -1,17 +1,59 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
+  // Una sola instancia del browser client: la misma que procesa el hash de la URL
+  // debe ser la que llame a updateUser, para compartir la sesión de recuperación.
+  const [supabase] = useState(() => createClient())
+
+  const [status, setStatus] = useState<'verifying' | 'ready' | 'invalid'>(
+    'verifying'
+  )
   const [error, setError] = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const inputClass =
     'rounded-lg px-3 py-2.5 text-sm outline-none transition-all bg-[#161b2e] border border-[#1e2540] text-[#f0f2ff] placeholder-[#2e3555] focus:border-[#3b7ff5] focus:shadow-[0_0_0_3px_rgba(59,127,245,0.15)]'
+
+  useEffect(() => {
+    let resolved = false
+
+    const markReady = () => {
+      resolved = true
+      setStatus('ready')
+    }
+
+    // El browser client procesa el hash (#access_token=...&type=recovery) al iniciar
+    // y dispara PASSWORD_RECOVERY cuando la sesión de recuperación queda lista.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || session) {
+        markReady()
+      }
+    })
+
+    // Fallback: si el evento se disparó antes de suscribirnos, igual detectamos la sesión.
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) markReady()
+    })
+
+    // Si tras unos segundos no hay sesión, el enlace es inválido o expiró.
+    const timeout = setTimeout(() => {
+      if (!resolved) setStatus('invalid')
+    }, 6000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
+  }, [supabase])
 
   async function handleSubmit(formData: FormData) {
     setError(null)
@@ -26,7 +68,6 @@ export default function ResetPasswordPage() {
     }
 
     setLoading(true)
-    const supabase = createClient()
     const { error } = await supabase.auth.updateUser({ password })
 
     if (error) {
@@ -85,63 +126,87 @@ export default function ResetPasswordPage() {
           Elegí una contraseña nueva para tu cuenta
         </p>
 
-        <form action={handleSubmit} className="flex flex-col gap-4 mt-7">
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium"
-              style={{ color: '#8a92b2' }}
-            >
-              Nueva contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              placeholder="••••••••"
-              className={inputClass}
-            />
+        {status === 'verifying' && (
+          <div className="flex items-center gap-2.5 mt-7" style={{ color: '#8a92b2' }}>
+            <Loader2 size={16} className="animate-spin" />
+            <span className="text-sm">Verificando enlace...</span>
           </div>
+        )}
 
-          <div className="flex flex-col gap-1.5">
-            <label
-              htmlFor="confirm_password"
-              className="text-sm font-medium"
-              style={{ color: '#8a92b2' }}
-            >
-              Confirmar contraseña
-            </label>
-            <input
-              id="confirm_password"
-              name="confirm_password"
-              type="password"
-              required
-              minLength={6}
-              placeholder="••••••••"
-              className={inputClass}
-            />
-            {passwordError && (
-              <p className="text-sm text-red-400 mt-0.5">{passwordError}</p>
-            )}
-          </div>
-
-          {error && (
-            <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
-              {error}
+        {status === 'invalid' && (
+          <div className="mt-7">
+            <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2.5">
+              El enlace de recuperación no es válido o expiró.
             </p>
-          )}
+            <a
+              href="/forgot-password"
+              className="block text-center text-sm hover:underline mt-4"
+              style={{ color: '#3b7ff5' }}
+            >
+              Pedir un nuevo enlace
+            </a>
+          </div>
+        )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-1 rounded-lg py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
-            style={{ backgroundColor: '#3b7ff5' }}
-          >
-            {loading ? 'Guardando...' : 'Guardar contraseña'}
-          </button>
-        </form>
+        {status === 'ready' && (
+          <form action={handleSubmit} className="flex flex-col gap-4 mt-7">
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="password"
+                className="text-sm font-medium"
+                style={{ color: '#8a92b2' }}
+              >
+                Nueva contraseña
+              </label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                required
+                minLength={6}
+                placeholder="••••••••"
+                className={inputClass}
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label
+                htmlFor="confirm_password"
+                className="text-sm font-medium"
+                style={{ color: '#8a92b2' }}
+              >
+                Confirmar contraseña
+              </label>
+              <input
+                id="confirm_password"
+                name="confirm_password"
+                type="password"
+                required
+                minLength={6}
+                placeholder="••••••••"
+                className={inputClass}
+              />
+              {passwordError && (
+                <p className="text-sm text-red-400 mt-0.5">{passwordError}</p>
+              )}
+            </div>
+
+            {error && (
+              <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="mt-1 rounded-lg py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-60 cursor-pointer"
+              style={{ backgroundColor: '#3b7ff5' }}
+            >
+              {loading ? 'Guardando...' : 'Guardar contraseña'}
+            </button>
+          </form>
+        )}
       </div>
 
       {/* Footer del card */}
