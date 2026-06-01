@@ -76,6 +76,9 @@ export default function ResetPasswordPage() {
       return
     }
 
+    // updateUser deja la sesión de recuperación activa; la cerramos para que el
+    // usuario tenga que iniciar sesión con la contraseña nueva (y no caiga al dashboard).
+    await supabase.auth.signOut()
     router.push('/login?reset=success')
   }
 
