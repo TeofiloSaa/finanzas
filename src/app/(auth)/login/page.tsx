@@ -134,13 +134,13 @@ function LoginCard() {
           </button>
         </form>
 
-        <Link
+        <a
           href="/forgot-password"
           className="block text-center text-sm hover:underline mt-4"
           style={{ color: '#3b7ff5' }}
         >
           ¿Olvidaste tu contraseña?
-        </Link>
+        </a>
       </div>
 
       {/* Footer del card */}
