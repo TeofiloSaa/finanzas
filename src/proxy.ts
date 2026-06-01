@@ -30,15 +30,24 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const { pathname } = request.nextUrl
-  const isAuthRoute = pathname.startsWith('/login') || pathname.startsWith('/register')
 
-  if (!user && !isAuthRoute) {
+  // Rutas accesibles sin autenticación.
+  const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password']
+  const isPublicRoute = publicRoutes.some((r) => pathname.startsWith(r))
+
+  // Rutas de las que se expulsa al usuario ya autenticado (lo mandamos al dashboard).
+  // /reset-password queda afuera a propósito: el link de recuperación crea una sesión
+  // y el usuario igual necesita poder cambiar su contraseña sin ser redirigido.
+  const redirectIfAuthed = ['/login', '/register', '/forgot-password']
+  const isRedirectIfAuthed = redirectIfAuthed.some((r) => pathname.startsWith(r))
+
+  if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuthRoute) {
+  if (user && isRedirectIfAuthed) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
