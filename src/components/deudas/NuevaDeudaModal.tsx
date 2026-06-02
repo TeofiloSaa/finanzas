@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { crearDeuda } from '@/app/actions/debts'
+import { formatInputMonto, parseInputMonto } from '@/lib/utils'
 import type { DebtType } from '@/types'
 
 const INPUT_CLASS =
@@ -24,6 +25,7 @@ export default function NuevaDeudaModal({
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [amountDisplay, setAmountDisplay] = useState('')
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -130,14 +132,19 @@ export default function NuevaDeudaModal({
               </label>
               <input
                 id="total_amount"
-                name="total_amount"
-                type="number"
-                min="0.01"
-                step="0.01"
+                type="text"
+                inputMode="numeric"
                 required
-                placeholder="0.00"
+                placeholder="0"
+                value={amountDisplay}
+                onChange={(e) => setAmountDisplay(formatInputMonto(e.target.value))}
                 className={INPUT_CLASS}
                 style={{ backgroundColor: 'var(--background)' }}
+              />
+              <input
+                type="hidden"
+                name="total_amount"
+                value={amountDisplay ? String(parseInputMonto(amountDisplay)) : ''}
               />
             </div>
           </div>

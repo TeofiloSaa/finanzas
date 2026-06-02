@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { crearTransaccion, editarTransaccion } from '@/app/actions/transactions'
+import { formatInputMonto, parseInputMonto } from '@/lib/utils'
 import type { Transaction, TransactionType, Category } from '@/types'
 
 const INPUT_CLASS =
@@ -26,6 +27,11 @@ export default function NuevaTransaccionModal({
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [amountDisplay, setAmountDisplay] = useState(() =>
+    transaction?.amount != null
+      ? formatInputMonto(String(Math.round(Number(transaction.amount))))
+      : ''
+  )
 
   const today = new Date().toISOString().split('T')[0]
   const filteredCategories = categories.filter((c) => c.type === type)
@@ -134,16 +140,20 @@ export default function NuevaTransaccionModal({
               </label>
               <input
                 id="amount"
-                name="amount"
-                type="number"
-                min="0.01"
-                step="0.01"
-                placeholder="0.00"
+                type="text"
+                inputMode="numeric"
+                placeholder="0"
                 required
                 autoFocus
-                defaultValue={transaction?.amount ?? ''}
+                value={amountDisplay}
+                onChange={(e) => setAmountDisplay(formatInputMonto(e.target.value))}
                 className={INPUT_CLASS}
                 style={{ backgroundColor: 'var(--background)' }}
+              />
+              <input
+                type="hidden"
+                name="amount"
+                value={amountDisplay ? String(parseInputMonto(amountDisplay)) : ''}
               />
             </div>
           </div>

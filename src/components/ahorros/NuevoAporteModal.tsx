@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { agregarAporte } from '@/app/actions/savings'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatInputMonto, parseInputMonto } from '@/lib/utils'
 import type { SavingsGoal } from '@/types'
 
 const INPUT_CLASS =
@@ -21,6 +21,7 @@ export default function NuevoAporteModal({
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [amountDisplay, setAmountDisplay] = useState('')
 
   const today = new Date().toISOString().split('T')[0]
   const restante = Math.max(0, Number(goal.target_amount) - Number(goal.current_amount))
@@ -79,15 +80,20 @@ export default function NuevoAporteModal({
             </label>
             <input
               id="amount"
-              name="amount"
-              type="number"
-              min="0.01"
-              step="0.01"
+              type="text"
+              inputMode="numeric"
               required
               autoFocus
-              placeholder="0.00"
+              placeholder="0"
+              value={amountDisplay}
+              onChange={(e) => setAmountDisplay(formatInputMonto(e.target.value))}
               className={INPUT_CLASS}
               style={{ backgroundColor: 'var(--background)' }}
+            />
+            <input
+              type="hidden"
+              name="amount"
+              value={amountDisplay ? String(parseInputMonto(amountDisplay)) : ''}
             />
           </div>
 

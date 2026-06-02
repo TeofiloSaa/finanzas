@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { crearMeta } from '@/app/actions/savings'
+import { formatInputMonto, parseInputMonto } from '@/lib/utils'
 
 const INPUT_CLASS =
   'rounded-lg px-3 py-2.5 text-sm text-fg placeholder-fg/30 border border-fg/10 outline-none focus:border-[#3b7ff5] transition-colors w-full'
@@ -17,6 +18,7 @@ export default function NuevaMetaModal({
   const formRef = useRef<HTMLFormElement>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [amountDisplay, setAmountDisplay] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -83,14 +85,19 @@ export default function NuevaMetaModal({
             </label>
             <input
               id="target_amount"
-              name="target_amount"
-              type="number"
-              min="0.01"
-              step="0.01"
+              type="text"
+              inputMode="numeric"
               required
-              placeholder="0.00"
+              placeholder="0"
+              value={amountDisplay}
+              onChange={(e) => setAmountDisplay(formatInputMonto(e.target.value))}
               className={INPUT_CLASS}
               style={{ backgroundColor: 'var(--background)' }}
+            />
+            <input
+              type="hidden"
+              name="target_amount"
+              value={amountDisplay ? String(parseInputMonto(amountDisplay)) : ''}
             />
           </div>
 
