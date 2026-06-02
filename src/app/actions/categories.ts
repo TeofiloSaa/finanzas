@@ -28,8 +28,14 @@ const DEFAULT_CATEGORIES: { name: string; type: TransactionType; color: string }
  * Idempotente: si ya existe al menos una categoría con is_default = true,
  * no inserta nada (evita duplicar las predeterminadas).
  */
-export async function seedDefaultCategories(userId: string) {
+export async function seedDefaultCategories() {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+  const userId = user.id
 
   const { count, error: countError } = await supabase
     .from('categories')
@@ -61,8 +67,14 @@ export async function seedDefaultCategories(userId: string) {
  * Deja una sola categoría por (name + type + user_id): conserva la más antigua
  * según created_at y borra las demás. Repara estados con duplicados previos.
  */
-export async function limpiarCategoriasDuplicadas(userId: string) {
+export async function limpiarCategoriasDuplicadas() {
   const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+  const userId = user.id
 
   const { data: cats, error } = await supabase
     .from('categories')

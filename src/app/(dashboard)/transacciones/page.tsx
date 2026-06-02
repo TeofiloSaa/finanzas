@@ -29,7 +29,7 @@ export default async function TransaccionesPage() {
     .order('created_at', { ascending: true })
 
   if (!categories || categories.length === 0) {
-    await seedDefaultCategories(user.id)
+    await seedDefaultCategories()
     const reload = await supabase
       .from('categories')
       .select('*')

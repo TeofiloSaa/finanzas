@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { validatePassword } from '@/lib/utils'
 
 export async function login(formData: FormData) {
   const email = formData.get('email') as string
@@ -21,6 +22,11 @@ export async function register(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const fullName = ((formData.get('full_name') as string) ?? '').trim()
+
+  const passwordError = validatePassword(password ?? '')
+  if (passwordError) {
+    return { error: passwordError }
+  }
 
   const supabase = await createClient()
   const { error } = await supabase.auth.signUp({

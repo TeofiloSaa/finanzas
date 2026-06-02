@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { validatePassword, PASSWORD_RULE_HINT } from '@/lib/utils'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -61,6 +62,12 @@ export default function ResetPasswordPage() {
 
     const password = formData.get('password') as string
     const confirmPassword = formData.get('confirm_password') as string
+
+    const rule = validatePassword(password ?? '')
+    if (rule) {
+      setPasswordError(rule)
+      return
+    }
 
     if (password !== confirmPassword) {
       setPasswordError('Las contraseñas no coinciden')
@@ -166,10 +173,13 @@ export default function ResetPasswordPage() {
                 name="password"
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 placeholder="••••••••"
                 className={inputClass}
               />
+              <p style={{ fontSize: '12px', color: '#4a5270' }}>
+                {PASSWORD_RULE_HINT}
+              </p>
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -185,7 +195,7 @@ export default function ResetPasswordPage() {
                 name="confirm_password"
                 type="password"
                 required
-                minLength={6}
+                minLength={8}
                 placeholder="••••••••"
                 className={inputClass}
               />

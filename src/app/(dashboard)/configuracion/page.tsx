@@ -24,7 +24,7 @@ export default async function ConfiguracionPage() {
     .maybeSingle()
 
   // Repara estados previos con categorías duplicadas antes de leer.
-  await limpiarCategoriasDuplicadas(user.id)
+  await limpiarCategoriasDuplicadas()
 
   let { data: categories } = await supabase
     .from('categories')
@@ -34,7 +34,7 @@ export default async function ConfiguracionPage() {
     .order('created_at', { ascending: true })
 
   if (!categories || categories.length === 0) {
-    await seedDefaultCategories(user.id)
+    await seedDefaultCategories()
     const reload = await supabase
       .from('categories')
       .select('*')

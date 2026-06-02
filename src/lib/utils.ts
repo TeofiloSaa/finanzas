@@ -27,3 +27,14 @@ export function parseInputMonto(value: string): number {
   const digits = value.replace(/\D/g, '')
   return digits ? parseInt(digits, 10) : 0
 }
+
+// Política de contraseñas: mínimo 8 caracteres y al menos 1 número.
+// Devuelve el mensaje de error a mostrar, o null si la contraseña es válida.
+// Se usa tanto en el cliente (validación inline) como en el servidor (autoritativo).
+export const PASSWORD_RULE_HINT = 'La contraseña debe tener al menos 8 caracteres y un número.'
+
+export function validatePassword(password: string): string | null {
+  if (password.length < 8) return PASSWORD_RULE_HINT
+  if (!/\d/.test(password)) return PASSWORD_RULE_HINT
+  return null
+}
