@@ -3,6 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { canPerformAction } from '@/lib/plans'
+import type { Plan } from '@/types'
+
+const LIMITE_FREE = 'Límite del plan Free alcanzado. Upgrade a Pro para continuar.'
 
 export async function crearMeta(formData: FormData) {
   const supabase = await createClient()
@@ -19,6 +23,24 @@ export async function crearMeta(formData: FormData) {
 
   if (!name || isNaN(target_amount) || target_amount <= 0) {
     return { error: 'Completá nombre y monto objetivo.' }
+  }
+
+  // Límite del plan Free: máximo de metas activas (no completadas).
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user.id)
+    .maybeSingle()
+  const plan = (profile?.plan as Plan) ?? 'free'
+
+  const { count } = await supabase
+    .from('savings_goals')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('completed', false)
+
+  if (!canPerformAction(plan, 'goals', count ?? 0)) {
+    return { error: LIMITE_FREE }
   }
 
   const { error } = await supabase.from('savings_goals').insert({

@@ -32,7 +32,15 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Rutas accesibles sin autenticación.
-  const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password']
+  // /api/webhooks/* lo consumen servicios externos (Lemon Squeezy) que llegan
+  // sin sesión: no deben ser redirigidos a /login.
+  const publicRoutes = [
+    '/login',
+    '/register',
+    '/forgot-password',
+    '/reset-password',
+    '/api/webhooks/',
+  ]
   const isPublicRoute = publicRoutes.some((r) => pathname.startsWith(r))
 
   // Rutas de las que se expulsa al usuario ya autenticado (lo mandamos al dashboard).

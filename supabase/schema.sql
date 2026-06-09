@@ -18,6 +18,15 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
+-- Columnas de suscripción (Lemon Squeezy). Idempotentes: se aplican también
+-- sobre tablas profiles preexistentes (el "create table if not exists" de
+-- arriba NO agrega columnas nuevas a una tabla ya creada).
+alter table public.profiles
+  add column if not exists plan text not null default 'free'
+  check (plan in ('free', 'pro'));
+alter table public.profiles
+  add column if not exists lemon_subscription_id text;
+
 alter table public.profiles enable row level security;
 
 drop policy if exists "Perfil: select propio" on public.profiles;

@@ -2,6 +2,8 @@ export type TransactionType = 'ingreso' | 'gasto'
 
 export type DebtType = 'prestamo' | 'tarjeta' | 'otro'
 
+export type Plan = 'free' | 'pro'
+
 export interface Category {
   id: string
   user_id: string
@@ -17,6 +19,8 @@ export interface Profile {
   id: string
   email: string
   full_name?: string
+  plan: Plan
+  lemon_subscription_id?: string | null
   created_at: string
 }
 

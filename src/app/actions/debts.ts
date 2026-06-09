@@ -3,7 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import type { DebtType } from '@/types'
+import { canPerformAction } from '@/lib/plans'
+import type { DebtType, Plan } from '@/types'
+
+const LIMITE_FREE = 'Límite del plan Free alcanzado. Upgrade a Pro para continuar.'
 
 export async function crearDeuda(formData: FormData) {
   const supabase = await createClient()
@@ -33,6 +36,28 @@ export async function crearDeuda(formData: FormData) {
     !start_date
   ) {
     return { error: 'Revisá los datos del formulario.' }
+  }
+
+  // Límite del plan Free: máximo de deudas activas (no saldadas).
+  // paid_installments < installments no se puede comparar columna-vs-columna
+  // en un filtro, así que contamos en JS.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user.id)
+    .maybeSingle()
+  const plan = (profile?.plan as Plan) ?? 'free'
+
+  const { data: existingDebts } = await supabase
+    .from('debts')
+    .select('installments, paid_installments')
+    .eq('user_id', user.id)
+  const activas = (existingDebts ?? []).filter(
+    (d) => d.paid_installments < d.installments
+  ).length
+
+  if (!canPerformAction(plan, 'debts', activas)) {
+    return { error: LIMITE_FREE }
   }
 
   const { error } = await supabase.from('debts').insert({
