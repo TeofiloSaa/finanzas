@@ -15,8 +15,7 @@ const FREE_FEATURES = [
   'Hasta 20 transacciones por mes',
   '1 meta de ahorro activa',
   '1 deuda activa',
-  'Dashboard y gráficos',
-  'Exportar a CSV',
+  'Sin historial completo (solo mes actual)',
 ]
 
 const PRO_FEATURES = [
