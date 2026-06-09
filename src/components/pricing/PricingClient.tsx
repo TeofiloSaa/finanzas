@@ -9,23 +9,8 @@ import {
 } from '@/app/actions/subscription'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
 import { isPro } from '@/lib/plans'
+import { FREE_FEATURES, PRO_FEATURES } from '@/lib/plan-features'
 import type { Plan } from '@/types'
-
-const FREE_FEATURES = [
-  'Hasta 20 transacciones por mes',
-  '1 meta de ahorro activa',
-  '1 deuda activa',
-  'Sin historial completo (solo mes actual)',
-]
-
-const PRO_FEATURES = [
-  'Transacciones ilimitadas',
-  'Metas de ahorro ilimitadas',
-  'Deudas ilimitadas',
-  'Dashboard y gráficos',
-  'Exportar a CSV',
-  'Soporte prioritario',
-]
 
 export default function PricingClient({
   plan,

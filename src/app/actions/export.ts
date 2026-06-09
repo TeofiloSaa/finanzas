@@ -3,11 +3,16 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { toCSV } from '@/lib/csv'
-import type { Transaction, SavingsGoal, Debt } from '@/types'
+import { isPro } from '@/lib/plans'
+import type { Plan, Transaction, SavingsGoal, Debt } from '@/types'
 
 export type ExportDataset = 'transacciones' | 'ahorros' | 'deudas'
 
-type ExportResult = { csv: string; filename: string } | { error: string }
+// upgradeRequired distingue el bloqueo por plan de un error real: el cliente
+// muestra una invitación a pasar a Pro en lugar de un mensaje de error.
+type ExportResult =
+  | { csv: string; filename: string }
+  | { error: string; upgradeRequired?: boolean }
 
 function fechaArchivo(): string {
   return new Date().toISOString().slice(0, 10) // yyyy-mm-dd
@@ -20,6 +25,22 @@ export async function exportarCSV(dataset: ExportDataset): Promise<ExportResult>
   } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  // Exportar CSV es función del plan Pro: mismo chequeo de plan que usan
+  // los límites de transacciones/metas/deudas.
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('id', user.id)
+    .maybeSingle()
+  const plan = (profile?.plan as Plan) ?? 'free'
+
+  if (!isPro(plan)) {
+    return {
+      error: 'La exportación a CSV está disponible en el plan Pro.',
+      upgradeRequired: true,
+    }
+  }
 
   const stamp = fechaArchivo()
 

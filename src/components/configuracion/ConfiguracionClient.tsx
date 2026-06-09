@@ -25,6 +25,7 @@ import {
   reordenarCategoria,
 } from '@/app/actions/categories'
 import { exportarCSV, type ExportDataset } from '@/app/actions/export'
+import { createCheckoutSession } from '@/app/actions/subscription'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
 import { useTheme, type Theme } from '@/components/ui/ThemeProvider'
 import type { Category, TransactionType } from '@/types'
@@ -550,6 +551,8 @@ function CategoryGroup({
 function ExportData() {
   const [busy, setBusy] = useState<ExportDataset | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [needsUpgrade, setNeedsUpgrade] = useState(false)
+  const [upgrading, setUpgrading] = useState(false)
 
   const datasets: { key: ExportDataset; label: string }[] = [
     { key: 'transacciones', label: 'Transacciones' },
@@ -557,13 +560,27 @@ function ExportData() {
     { key: 'deudas', label: 'Deudas' },
   ]
 
+  async function handleUpgrade() {
+    setError(null)
+    setUpgrading(true)
+    const res = await createCheckoutSession()
+    if ('error' in res) {
+      setError(res.error)
+      setUpgrading(false)
+      return
+    }
+    window.location.href = res.url
+  }
+
   async function handleExport(dataset: ExportDataset) {
     setError(null)
+    setNeedsUpgrade(false)
     setBusy(dataset)
     try {
       const result = await exportarCSV(dataset)
       if ('error' in result) {
-        setError(result.error)
+        if (result.upgradeRequired) setNeedsUpgrade(true)
+        else setError(result.error)
         return
       }
       const blob = new Blob([result.csv], { type: 'text/csv;charset=utf-8;' })
@@ -603,6 +620,29 @@ function ExportData() {
           </button>
         ))}
       </div>
+      {needsUpgrade && (
+        <div
+          className="flex flex-col sm:flex-row sm:items-center gap-3 rounded-lg px-3 py-3 border"
+          style={{
+            borderColor: 'rgba(59,127,245,0.3)',
+            backgroundColor: 'rgba(59,127,245,0.08)',
+          }}
+        >
+          <p className="text-sm text-fg/70 flex-1">
+            Exportar a CSV es parte del plan Pro. Pasate a Pro y descargá tus
+            datos cuando quieras.
+          </p>
+          <button
+            type="button"
+            onClick={handleUpgrade}
+            disabled={upgrading}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-90 cursor-pointer disabled:opacity-60 shrink-0"
+            style={{ backgroundColor: '#3b7ff5' }}
+          >
+            {upgrading ? 'Redirigiendo...' : 'Pasar a Pro'}
+          </button>
+        </div>
+      )}
       {error && (
         <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
           {error}

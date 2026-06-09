@@ -35,6 +35,7 @@ export async function proxy(request: NextRequest) {
   // /api/webhooks/* lo consumen servicios externos (Lemon Squeezy) que llegan
   // sin sesión: no deben ser redirigidos a /login.
   const publicRoutes = [
+    '/landing',
     '/login',
     '/register',
     '/forgot-password',
