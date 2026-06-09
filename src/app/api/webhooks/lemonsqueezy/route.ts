@@ -62,11 +62,13 @@ export async function POST(request: Request) {
     return new Response('Ignored', { status: 200 })
   }
 
+  // La fila se identifica por id (PK = uuid de auth.users). No escribimos
+  // email: la tabla profiles de esta base no tiene esa columna (el email vive
+  // en auth.users), e incluirlo rompía el upsert con 42703.
   const admin = createAdminClient()
   const { error } = await admin.from('profiles').upsert(
     {
       id: userId,
-      email: attrs.user_email,
       plan,
       lemon_subscription_id: plan === 'pro' ? subId : null,
     },
@@ -74,6 +76,15 @@ export async function POST(request: Request) {
   )
 
   if (error) {
+    console.error('[lemonsqueezy webhook] upsert profiles falló', {
+      event: eventName,
+      userId,
+      plan,
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    })
     return new Response('Database error', { status: 500 })
   }
 

@@ -11,16 +11,21 @@
 -- ============================================================================
 -- profiles
 -- ============================================================================
+-- Nota: el email NO se guarda acá; vive en auth.users. La fila se identifica
+-- por id (= auth.users.id). currency es la moneda preferida del usuario.
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
-  email text not null,
   full_name text,
+  currency text not null default 'ARS',
   created_at timestamptz not null default now()
 );
 
--- Columnas de suscripción (Lemon Squeezy). Idempotentes: se aplican también
--- sobre tablas profiles preexistentes (el "create table if not exists" de
--- arriba NO agrega columnas nuevas a una tabla ya creada).
+-- Columnas agregadas después de la creación inicial. Idempotentes: se aplican
+-- también sobre tablas profiles preexistentes (el "create table if not exists"
+-- de arriba NO agrega columnas nuevas a una tabla ya creada).
+alter table public.profiles
+  add column if not exists currency text not null default 'ARS';
+-- Suscripción (Lemon Squeezy).
 alter table public.profiles
   add column if not exists plan text not null default 'free'
   check (plan in ('free', 'pro'));

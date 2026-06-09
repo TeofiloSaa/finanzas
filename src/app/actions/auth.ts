@@ -41,7 +41,10 @@ export async function register(formData: FormData) {
     return { error: error.message }
   }
 
-  redirect('/dashboard')
+  // Con confirmación por email, signUp no crea sesión: el usuario debe
+  // confirmar antes de poder entrar. Devolvemos success para que la página
+  // muestre la pantalla "Revisá tu email" en vez de redirigir al dashboard.
+  return { success: true }
 }
 
 export async function forgotPassword(formData: FormData) {

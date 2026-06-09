@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { MailCheck } from 'lucide-react'
 import { register } from '@/app/actions/auth'
 import { validatePassword, PASSWORD_RULE_HINT } from '@/lib/utils'
 
@@ -9,6 +10,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [registeredEmail, setRegisteredEmail] = useState<string | null>(null)
 
   async function handleSubmit(formData: FormData) {
     setError(null)
@@ -33,11 +35,113 @@ export default function RegisterPage() {
     if (result?.error) {
       setError(result.error)
       setLoading(false)
+      return
     }
+
+    setRegisteredEmail((formData.get('email') as string) ?? '')
   }
 
   const inputClass =
     'rounded-lg px-3 py-2.5 text-sm outline-none transition-all bg-[#161b2e] border border-[#1e2540] text-[#f0f2ff] placeholder-[#2e3555] focus:border-[#3b7ff5] focus:shadow-[0_0_0_3px_rgba(59,127,245,0.15)]'
+
+  if (registeredEmail) {
+    return (
+      <div
+        className="w-full max-w-sm overflow-hidden"
+        style={{
+          backgroundColor: '#0f1117',
+          border: '1px solid #1e2130',
+          borderRadius: '16px',
+        }}
+      >
+        <div style={{ padding: '32px 28px' }}>
+          <div
+            style={{
+              width: '32px',
+              height: '2px',
+              backgroundColor: '#3b7ff5',
+              borderRadius: '2px',
+              marginBottom: '24px',
+            }}
+          />
+
+          <p
+            className="uppercase"
+            style={{
+              fontSize: '11px',
+              letterSpacing: '0.15em',
+              color: '#3b7ff5',
+            }}
+          >
+            Finanzas
+          </p>
+
+          <div
+            className="flex items-center justify-center"
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              backgroundColor: 'rgba(59,127,245,0.12)',
+              marginTop: '20px',
+            }}
+          >
+            <MailCheck size={24} strokeWidth={1.75} style={{ color: '#3b7ff5' }} />
+          </div>
+
+          <h2
+            style={{
+              fontSize: '26px',
+              fontWeight: 500,
+              color: '#f0f2ff',
+              letterSpacing: '-0.3px',
+              marginTop: '20px',
+            }}
+          >
+            Revisá tu email
+          </h2>
+
+          <p
+            style={{
+              fontSize: '13px',
+              color: '#8a92b2',
+              marginTop: '10px',
+              lineHeight: 1.6,
+            }}
+          >
+            Te enviamos un link de confirmación a{' '}
+            <span style={{ color: '#f0f2ff', fontWeight: 500 }}>
+              {registeredEmail}
+            </span>
+            . Hacé click en el link para activar tu cuenta.
+          </p>
+
+          <p style={{ fontSize: '12px', color: '#4a5270', marginTop: '14px' }}>
+            ¿No lo ves? Revisá la carpeta de spam.
+          </p>
+        </div>
+
+        {/* Footer del card */}
+        <div
+          className="text-center text-sm"
+          style={{
+            borderTop: '1px solid #161b2e',
+            backgroundColor: '#0b0e18',
+            padding: '16px 28px',
+            color: '#2e3555',
+          }}
+        >
+          <Link
+            href="/login"
+            style={{ color: '#3b7ff5' }}
+            className="hover:underline"
+          >
+            Volver al inicio de sesión
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div

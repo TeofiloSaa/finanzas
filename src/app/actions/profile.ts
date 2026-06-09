@@ -14,12 +14,13 @@ export async function updateProfile(formData: FormData) {
 
   const full_name = ((formData.get('full_name') as string) ?? '').trim() || null
 
+  // La tabla profiles no tiene columna email (el email vive en auth.users).
+  // La fila se identifica por id (PK = uuid de auth.users).
   const { error } = await supabase
     .from('profiles')
     .upsert(
       {
         id: user.id,
-        email: user.email!,
         full_name,
       },
       { onConflict: 'id' }
