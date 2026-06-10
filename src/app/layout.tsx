@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import SWRegister from '@/components/ui/SWRegister'
 import './globals.css'
 
@@ -50,6 +51,7 @@ export default function RootLayout({
       <body className="antialiased">
         {children}
         <SWRegister />
+        <Analytics />
       </body>
     </html>
   )
