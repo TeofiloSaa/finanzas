@@ -52,7 +52,8 @@ export async function proxy(request: NextRequest) {
 
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    // La raíz sin sesión va a la landing (cara pública); el resto, a login.
+    url.pathname = pathname === '/' ? '/landing' : '/login'
     return NextResponse.redirect(url)
   }
 
