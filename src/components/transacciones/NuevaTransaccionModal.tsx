@@ -4,6 +4,7 @@ import { useState, useRef } from 'react'
 import { X } from 'lucide-react'
 import { crearTransaccion, editarTransaccion } from '@/app/actions/transactions'
 import { formatInputMonto, parseInputMonto } from '@/lib/utils'
+import UpgradePrompt from '@/components/ui/UpgradePrompt'
 import type { Transaction, TransactionType, Category } from '@/types'
 
 const INPUT_CLASS =
@@ -27,6 +28,7 @@ export default function NuevaTransaccionModal({
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [needsUpgrade, setNeedsUpgrade] = useState(false)
   const [amountDisplay, setAmountDisplay] = useState(() =>
     transaction?.amount != null
       ? formatInputMonto(String(Math.round(Number(transaction.amount))))
@@ -41,12 +43,17 @@ export default function NuevaTransaccionModal({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    setNeedsUpgrade(false)
     setLoading(true)
     const formData = new FormData(formRef.current!)
     const result = transaction
       ? await editarTransaccion(transaction.id, formData)
       : await crearTransaccion(formData)
     setLoading(false)
+    if (result && 'upgradeRequired' in result && result.upgradeRequired) {
+      setNeedsUpgrade(true)
+      return
+    }
     if (result?.error) {
       setError(result.error)
       return
@@ -210,8 +217,13 @@ export default function NuevaTransaccionModal({
             />
           </div>
 
+          {/* Límite del plan alcanzado → invitación a Pro */}
+          {needsUpgrade && (
+            <UpgradePrompt message="Llegaste al límite de transacciones del plan Free para ese mes. Pasate a Pro y registrá sin límite." />
+          )}
+
           {/* Error */}
-          {error && (
+          {error && !needsUpgrade && (
             <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-3 py-2">
               {error}
             </p>
