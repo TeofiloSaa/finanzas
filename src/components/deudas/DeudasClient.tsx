@@ -3,11 +3,17 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, CreditCard } from 'lucide-react'
-import type { Debt } from '@/types'
+import type { Debt, DebtPayment } from '@/types'
 import DeudaCard from './DeudaCard'
 import NuevaDeudaModal from './NuevaDeudaModal'
 
-export default function DeudasClient({ debts }: { debts: Debt[] }) {
+export default function DeudasClient({
+  debts,
+  payments,
+}: {
+  debts: Debt[]
+  payments: DebtPayment[]
+}) {
   const router = useRouter()
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -20,6 +26,15 @@ export default function DeudasClient({ debts }: { debts: Debt[] }) {
     }
     return { activas: a, saldadas: s }
   }, [debts])
+
+  // Último pago revertible por deuda (payments ya viene desc por created_at).
+  const lastPaymentByDebt = useMemo(() => {
+    const map = new Map<string, DebtPayment>()
+    for (const p of payments) {
+      if (!map.has(p.debt_id)) map.set(p.debt_id, p)
+    }
+    return map
+  }, [payments])
 
   function handleChanged() {
     router.refresh()
@@ -94,7 +109,12 @@ export default function DeudasClient({ debts }: { debts: Debt[] }) {
           </h2>
           <div className="grid grid-cols-1 gap-3">
             {activas.map((d) => (
-              <DeudaCard key={d.id} debt={d} onChanged={handleChanged} />
+              <DeudaCard
+                key={d.id}
+                debt={d}
+                lastPayment={lastPaymentByDebt.get(d.id) ?? null}
+                onChanged={handleChanged}
+              />
             ))}
           </div>
         </section>
@@ -117,7 +137,12 @@ export default function DeudasClient({ debts }: { debts: Debt[] }) {
           </h2>
           <div className="grid grid-cols-1 gap-3">
             {saldadas.map((d) => (
-              <DeudaCard key={d.id} debt={d} onChanged={handleChanged} />
+              <DeudaCard
+                key={d.id}
+                debt={d}
+                lastPayment={lastPaymentByDebt.get(d.id) ?? null}
+                onChanged={handleChanged}
+              />
             ))}
           </div>
         </section>

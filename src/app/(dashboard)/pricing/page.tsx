@@ -13,7 +13,13 @@ export default async function PricingPage() {
 
   if (!user) redirect('/login')
 
-  const { plan, subscriptionId } = await getSubscriptionStatus(user.id)
+  const { plan, planExpiresAt, subscriptionId } = await getSubscriptionStatus(user.id)
 
-  return <PricingClient plan={plan} subscriptionId={subscriptionId} />
+  return (
+    <PricingClient
+      plan={plan}
+      planExpiresAt={planExpiresAt}
+      subscriptionId={subscriptionId}
+    />
+  )
 }

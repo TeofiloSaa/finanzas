@@ -4,6 +4,10 @@ export type DebtType = 'prestamo' | 'tarjeta' | 'otro'
 
 export type Plan = 'free' | 'pro'
 
+// Origen de una transacción generada automáticamente. NULL/undefined = manual.
+// A futuro: 'retiro_ahorro' para retiros que generan un ingreso.
+export type AutoOrigin = 'aporte_ahorro' | 'pago_deuda'
+
 export interface Category {
   id: string
   user_id: string
@@ -11,6 +15,7 @@ export interface Category {
   type: TransactionType
   color: string
   is_default: boolean
+  is_system: boolean
   sort_order: number
   created_at: string
 }
@@ -21,6 +26,7 @@ export interface Profile {
   full_name?: string
   plan: Plan
   lemon_subscription_id?: string | null
+  plan_expires_at?: string | null
   created_at: string
 }
 
@@ -32,6 +38,7 @@ export interface Transaction {
   category: string
   description?: string
   date: string
+  auto_origin?: AutoOrigin | null
   created_at: string
 }
 
@@ -52,6 +59,17 @@ export interface SavingsContribution {
   user_id: string
   amount: number
   date: string
+  transaction_id?: string | null
+  created_at: string
+}
+
+export interface DebtPayment {
+  id: string
+  debt_id: string
+  user_id: string
+  amount: number
+  date: string
+  transaction_id?: string | null
   created_at: string
 }
 

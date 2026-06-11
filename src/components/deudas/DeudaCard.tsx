@@ -1,11 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, Check, CreditCard, Banknote, Receipt, CalendarClock } from 'lucide-react'
+import { Trash2, Check, CreditCard, Banknote, Receipt, CalendarClock, Undo2 } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { eliminarDeuda, pagarCuota } from '@/app/actions/debts'
+import { eliminarDeuda, pagarCuota, revertirPago } from '@/app/actions/debts'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
-import type { Debt, DebtType } from '@/types'
+import type { Debt, DebtType, DebtPayment } from '@/types'
 
 const TYPE_META: Record<DebtType, { label: string; Icon: typeof CreditCard }> = {
   prestamo: { label: 'Préstamo', Icon: Banknote },
@@ -50,12 +50,14 @@ function formatDateObj(d: Date): string {
 
 export default function DeudaCard({
   debt,
+  lastPayment,
   onChanged,
 }: {
   debt: Debt
+  lastPayment: DebtPayment | null
   onChanged: () => void
 }) {
-  const [busy, setBusy] = useState<'delete' | 'pay' | null>(null)
+  const [busy, setBusy] = useState<'delete' | 'pay' | 'revert' | null>(null)
   const confirm = useConfirm()
 
   const total = Number(debt.total_amount)
@@ -88,6 +90,25 @@ export default function DeudaCard({
   async function handlePay() {
     setBusy('pay')
     const result = await pagarCuota(debt.id)
+    setBusy(null)
+    if (result?.error) {
+      window.alert(result.error)
+      return
+    }
+    onChanged()
+  }
+
+  async function handleRevert() {
+    if (!lastPayment) return
+    const ok = await confirm({
+      title: 'Revertir último pago',
+      message: `¿Revertir el pago de ${formatCurrency(Number(lastPayment.amount))} del ${formatDate(lastPayment.date)}? También se borra su transacción de gasto.`,
+      confirmLabel: 'Revertir',
+      variant: 'danger',
+    })
+    if (!ok) return
+    setBusy('revert')
+    const result = await revertirPago(lastPayment.id)
     setBusy(null)
     if (result?.error) {
       window.alert(result.error)
@@ -276,25 +297,48 @@ export default function DeudaCard({
 
       {/* Footer */}
       {saldada ? (
-        <div className="pt-3 text-center">
+        <div className="pt-3 border-t border-fg/5 flex items-center justify-center gap-3">
           <span style={{ color: '#4ade80' }} className="text-sm font-medium">
             Deuda saldada ✓
           </span>
+          {lastPayment && (
+            <button
+              onClick={handleRevert}
+              disabled={busy !== null}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-fg/50 border border-fg/10 hover:bg-fg/5 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <Undo2 size={12} strokeWidth={2} />
+              {busy === 'revert' ? 'Revirtiendo...' : 'Revertir último pago'}
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex items-center justify-between gap-3 pt-3 border-t border-fg/5">
           <p className="text-xs text-fg/40">
             Inicio: {formatDate(debt.start_date)}
           </p>
-          <button
-            onClick={handlePay}
-            disabled={busy !== null}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-fg transition-opacity hover:opacity-90 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ backgroundColor: '#3b7ff5' }}
-          >
-            <Check size={13} strokeWidth={2.5} />
-            {busy === 'pay' ? 'Pagando...' : `Pagar cuota ${paid + 1}`}
-          </button>
+          <div className="flex items-center gap-2">
+            {lastPayment && (
+              <button
+                onClick={handleRevert}
+                disabled={busy !== null}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-fg/50 border border-fg/10 hover:bg-fg/5 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                title="Revertir el último pago registrado"
+              >
+                <Undo2 size={12} strokeWidth={2} />
+                {busy === 'revert' ? 'Revirtiendo...' : 'Revertir'}
+              </button>
+            )}
+            <button
+              onClick={handlePay}
+              disabled={busy !== null}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-fg transition-opacity hover:opacity-90 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{ backgroundColor: '#3b7ff5' }}
+            >
+              <Check size={13} strokeWidth={2.5} />
+              {busy === 'pay' ? 'Pagando...' : `Pagar cuota ${paid + 1}`}
+            </button>
+          </div>
         </div>
       )}
     </div>

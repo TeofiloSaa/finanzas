@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { SYSTEM_CATEGORIES } from '@/lib/system-categories'
 import type { TransactionType } from '@/types'
 
 const DEFAULT_CATEGORIES: { name: string; type: TransactionType; color: string }[] = [
@@ -54,10 +55,25 @@ export async function seedDefaultCategories() {
     type: c.type,
     color: c.color,
     is_default: true,
+    is_system: false,
     sort_order: counters[c.type]++,
   }))
 
-  const { error } = await supabase.from('categories').insert(rows)
+  // Categorías de sistema ('Ahorros', 'Pago de deudas'): gasto, no editables ni
+  // borrables. Las usan las transacciones automáticas de aportes/pagos.
+  const systemRows = SYSTEM_CATEGORIES.map((c) => ({
+    user_id: userId,
+    name: c.name,
+    type: 'gasto' as TransactionType,
+    color: c.color,
+    is_default: false,
+    is_system: true,
+    sort_order: c.sort_order,
+  }))
+
+  const { error } = await supabase
+    .from('categories')
+    .insert([...rows, ...systemRows])
   if (error) return { error: error.message }
 
   return { success: true }
@@ -175,15 +191,18 @@ export async function eliminarCategoria(id: string) {
 
   if (!user) redirect('/login')
 
-  // Solo se pueden eliminar categorías custom (is_default = false)
+  // Solo se pueden eliminar categorías custom (is_default = false, is_system = false)
   const { data: cat, error: fetchError } = await supabase
     .from('categories')
-    .select('id, is_default')
+    .select('id, is_default, is_system')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
 
   if (fetchError || !cat) return { error: 'No se encontró la categoría.' }
+  if (cat.is_system) {
+    return { error: 'No se pueden eliminar las categorías de sistema.' }
+  }
   if (cat.is_default) {
     return { error: 'No se pueden eliminar las categorías predeterminadas.' }
   }
@@ -217,12 +236,15 @@ export async function reordenarCategoria(id: string, direction: 'up' | 'down') {
 
   const { data: target, error: targetError } = await supabase
     .from('categories')
-    .select('id, type, is_default')
+    .select('id, type, is_default, is_system')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
 
   if (targetError || !target) return { error: 'No se encontró la categoría.' }
+  if (target.is_system) {
+    return { error: 'Las categorías de sistema no se pueden reordenar.' }
+  }
   if (target.is_default) {
     return { error: 'Las categorías predeterminadas no se pueden reordenar.' }
   }
@@ -234,6 +256,7 @@ export async function reordenarCategoria(id: string, direction: 'up' | 'down') {
     .select('id, sort_order, created_at')
     .eq('user_id', user.id)
     .eq('type', target.type)
+    .eq('is_system', false)
     .order('sort_order', { ascending: true })
     .order('created_at', { ascending: true })
 

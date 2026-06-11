@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowDownLeft, ArrowUpRight, Trash2, Pencil } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Trash2, Pencil, Lock } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { eliminarTransaccion } from '@/app/actions/transactions'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
@@ -22,6 +22,9 @@ export default function TransaccionFila({
   const confirm = useConfirm()
 
   const isIngreso = t.type === 'ingreso'
+  // Transacción generada por un aporte/pago: no editable (se desincronizaría con
+  // la meta/deuda). Sí se puede borrar: eso revierte el aporte/pago de origen.
+  const isAuto = !!t.auto_origin
   const Icon = isIngreso ? ArrowDownLeft : ArrowUpRight
   const iconBg = isIngreso ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)'
   const iconColor = isIngreso ? '#4ade80' : '#f87171'
@@ -30,7 +33,9 @@ export default function TransaccionFila({
   async function handleDelete() {
     const ok = await confirm({
       title: 'Eliminar transacción',
-      message: '¿Seguro que querés eliminar esta transacción?',
+      message: isAuto
+        ? 'Esta transacción se generó por un aporte/pago. Al eliminarla también se revierte ese aporte o pago de origen.'
+        : '¿Seguro que querés eliminar esta transacción?',
       confirmLabel: 'Eliminar',
       variant: 'danger',
     })
@@ -60,6 +65,14 @@ export default function TransaccionFila({
           <span className="text-sm font-medium text-fg truncate">
             {t.category}
           </span>
+          {isAuto && (
+            <span
+              className="shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full leading-none"
+              style={{ backgroundColor: 'rgba(59,127,245,0.15)', color: '#3b7ff5' }}
+            >
+              Automática
+            </span>
+          )}
           {t.description && (
             <span className="text-xs text-fg/40 truncate hidden sm:block">
               {t.description}
@@ -87,14 +100,24 @@ export default function TransaccionFila({
 
       {/* Acciones */}
       <div className="flex items-center gap-0.5 ml-0.5 shrink-0">
-        <button
-          onClick={() => onEdit(t)}
-          disabled={deleting}
-          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-fg/25 hover:text-[#3b7ff5] hover:bg-[#3b7ff5]/10 transition-all cursor-pointer disabled:cursor-not-allowed"
-          aria-label="Editar transacción"
-        >
-          <Pencil size={14} strokeWidth={1.75} />
-        </button>
+        {isAuto ? (
+          <span
+            className="p-1.5 rounded-md text-fg/20 cursor-not-allowed"
+            title="Esta transacción se generó automáticamente. Editá el aporte o pago de origen."
+            aria-label="Transacción automática (no editable)"
+          >
+            <Lock size={14} strokeWidth={1.75} />
+          </span>
+        ) : (
+          <button
+            onClick={() => onEdit(t)}
+            disabled={deleting}
+            className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-md text-fg/25 hover:text-[#3b7ff5] hover:bg-[#3b7ff5]/10 transition-all cursor-pointer disabled:cursor-not-allowed"
+            aria-label="Editar transacción"
+          >
+            <Pencil size={14} strokeWidth={1.75} />
+          </button>
+        )}
         <button
           onClick={handleDelete}
           disabled={deleting}

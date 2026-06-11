@@ -1,10 +1,6 @@
 import crypto from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { Plan } from '@/types'
-
-// Statuses de Lemon Squeezy que dan acceso Pro. El resto (cancelled,
-// expired, unpaid, past_due, paused…) baja a free.
-const ACTIVE_STATUSES = new Set(['active', 'on_trial'])
+import { deriveSubscriptionState } from '@/lib/subscription'
 
 // Verifica la firma HMAC-SHA256 del webhook contra el header x-signature.
 function verifySignature(raw: string, signature: string | null): boolean {
@@ -30,7 +26,10 @@ export async function POST(request: Request) {
 
   let body: {
     meta?: { custom_data?: { user_id?: string } }
-    data?: { id?: string | number; attributes?: { status?: string; user_email?: string } }
+    data?: {
+      id?: string | number
+      attributes?: { status?: string; ends_at?: string | null; user_email?: string }
+    }
   }
   try {
     body = JSON.parse(raw)
@@ -49,18 +48,27 @@ export async function POST(request: Request) {
     return new Response('Ignored', { status: 200 })
   }
 
-  let plan: Plan
-  if (eventName === 'subscription_cancelled') {
-    plan = 'free'
-  } else if (
-    eventName === 'subscription_created' ||
-    eventName === 'subscription_updated'
-  ) {
-    plan = ACTIVE_STATUSES.has(attrs.status ?? '') ? 'pro' : 'free'
-  } else {
-    // Evento no manejado: ack sin cambios.
+  // Solo eventos de suscripción: su data.id ES el id de la suscripción y attributes
+  // trae status + ends_at. Los subscription_payment_* se ignoran a propósito: su
+  // payload es una invoice (data.id = id de factura, NO de la suscripción) y el
+  // cambio de estado que provocan llega igual vía subscription_updated, así que
+  // manejarlos acá corrompería lemon_subscription_id.
+  const HANDLED_EVENTS = new Set([
+    'subscription_created',
+    'subscription_updated',
+    'subscription_cancelled',
+    'subscription_resumed',
+    'subscription_expired',
+  ])
+  if (!HANDLED_EVENTS.has(eventName ?? '')) {
     return new Response('Ignored', { status: 200 })
   }
+
+  // Estado derivado del snapshot del evento (status + ends_at). Misma función pura
+  // que usa cancelSubscription, así un webhook duplicado, tardío o posterior a la
+  // action converge siempre al mismo estado (idempotencia). Una cancelación con
+  // ends_at futuro mantiene plan='pro' + plan_expires_at hasta esa fecha.
+  const { plan, planExpiresAt } = deriveSubscriptionState(attrs.status, attrs.ends_at)
 
   // La fila se identifica por id (PK = uuid de auth.users). No escribimos
   // email: la tabla profiles de esta base no tiene esa columna (el email vive
@@ -70,6 +78,7 @@ export async function POST(request: Request) {
     {
       id: userId,
       plan,
+      plan_expires_at: planExpiresAt,
       lemon_subscription_id: plan === 'pro' ? subId : null,
     },
     { onConflict: 'id' }

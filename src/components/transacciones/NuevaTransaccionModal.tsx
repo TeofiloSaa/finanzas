@@ -36,7 +36,11 @@ export default function NuevaTransaccionModal({
   )
 
   const today = new Date().toISOString().split('T')[0]
-  const filteredCategories = categories.filter((c) => c.type === type)
+  // Las categorías de sistema ('Ahorros', 'Pago de deudas') están reservadas para
+  // las transacciones automáticas: no se ofrecen al cargar una transacción manual.
+  const filteredCategories = categories.filter(
+    (c) => c.type === type && !c.is_system
+  )
   const categoryNames = filteredCategories.map((c) => c.name)
   const initialCategory = transaction?.category
 

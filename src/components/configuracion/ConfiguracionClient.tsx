@@ -508,7 +508,11 @@ function CategoryGroup({
               <span className="text-sm text-fg flex-1 truncate">
                 {cat.name}
               </span>
-              {cat.is_default ? (
+              {cat.is_system ? (
+                <span className="text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded text-fg/40 border border-fg/10">
+                  Sistema
+                </span>
+              ) : cat.is_default ? (
                 <span className="text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded text-fg/40 border border-fg/10">
                   Default
                 </span>

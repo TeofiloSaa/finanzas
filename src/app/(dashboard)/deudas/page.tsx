@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import DeudasClient from '@/components/deudas/DeudasClient'
-import type { Debt } from '@/types'
+import type { Debt, DebtPayment } from '@/types'
 
 export const revalidate = 30
 
@@ -19,5 +19,17 @@ export default async function DeudasPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  return <DeudasClient debts={(data ?? []) as Debt[]} />
+  // Pagos individuales (más reciente primero) para poder revertir el último.
+  const { data: payments } = await supabase
+    .from('debt_payments')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  return (
+    <DeudasClient
+      debts={(data ?? []) as Debt[]}
+      payments={(payments ?? []) as DebtPayment[]}
+    />
+  )
 }

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AhorrosClient from '@/components/ahorros/AhorrosClient'
-import type { SavingsGoal } from '@/types'
+import type { SavingsGoal, SavingsContribution } from '@/types'
 
 export const revalidate = 30
 
@@ -20,5 +20,17 @@ export default async function AhorrosPage() {
     .order('completed', { ascending: true })
     .order('created_at', { ascending: false })
 
-  return <AhorrosClient goals={(data ?? []) as SavingsGoal[]} />
+  const { data: contributions } = await supabase
+    .from('savings_contributions')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('date', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  return (
+    <AhorrosClient
+      goals={(data ?? []) as SavingsGoal[]}
+      contributions={(contributions ?? []) as SavingsContribution[]}
+    />
+  )
 }

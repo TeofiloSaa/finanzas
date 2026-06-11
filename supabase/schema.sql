@@ -31,6 +31,10 @@ alter table public.profiles
   check (plan in ('free', 'pro'));
 alter table public.profiles
   add column if not exists lemon_subscription_id text;
+-- Fecha hasta la que el plan Pro sigue vigente tras una cancelación (= ends_at de
+-- Lemon Squeezy). null = sin vencimiento. Ver add_plan_expires_at.sql.
+alter table public.profiles
+  add column if not exists plan_expires_at timestamptz;
 
 alter table public.profiles enable row level security;
 
@@ -66,8 +70,17 @@ create table if not exists public.transactions (
   category text not null,
   description text,
   date date not null,
+  -- Marca de origen automático. NULL = transacción manual.
+  -- 'aporte_ahorro' | 'pago_deuda' las generan las RPC (ver auto_transactions.sql).
+  -- A futuro: 'retiro_ahorro'.
+  auto_origin text check (auto_origin in ('aporte_ahorro', 'pago_deuda')),
   created_at timestamptz not null default now()
 );
+
+-- Para tablas transactions preexistentes (el create table de arriba no agrega columnas).
+alter table public.transactions
+  add column if not exists auto_origin text
+  check (auto_origin in ('aporte_ahorro', 'pago_deuda'));
 
 create index if not exists transactions_user_id_idx
   on public.transactions (user_id);
@@ -146,13 +159,27 @@ create table if not exists public.savings_contributions (
   user_id uuid not null references auth.users (id) on delete cascade,
   amount numeric(14, 2) not null check (amount > 0),
   date date not null,
+  -- Transacción de gasto generada por este aporte (1:1). NULL en aportes viejos
+  -- (no migrados) y en aportes desligados al borrar la meta. ON DELETE CASCADE:
+  -- si se borra la transacción, el aporte se limpia (red de seguridad; la
+  -- reversión real del current_amount la hacen las RPC).
+  transaction_id uuid references public.transactions (id) on delete cascade,
   created_at timestamptz not null default now()
 );
+
+-- Para tablas savings_contributions preexistentes.
+alter table public.savings_contributions
+  add column if not exists transaction_id uuid
+  references public.transactions (id) on delete cascade;
 
 create index if not exists savings_contributions_goal_id_idx
   on public.savings_contributions (goal_id);
 create index if not exists savings_contributions_user_id_idx
   on public.savings_contributions (user_id);
+-- UNIQUE parcial: 1:1 con la transacción, tolerando aportes en NULL.
+create unique index if not exists savings_contributions_transaction_uidx
+  on public.savings_contributions (transaction_id)
+  where transaction_id is not null;
 
 alter table public.savings_contributions enable row level security;
 
@@ -221,4 +248,52 @@ create policy "Deudas: update propias"
 drop policy if exists "Deudas: delete propias" on public.debts;
 create policy "Deudas: delete propias"
   on public.debts for delete
+  using (auth.uid() = user_id);
+
+-- ============================================================================
+-- debt_payments
+-- ============================================================================
+-- Cada pago de una cuota es una fila (antes era solo un +1 en paid_installments).
+-- Lo usa la RPC pago_crear para ligar el pago a su transacción automática.
+-- transaction_id: gasto generado por el pago (1:1). NULL en pagos viejos o
+-- desligados al borrar la deuda. Las funciones viven en auto_transactions.sql.
+create table if not exists public.debt_payments (
+  id uuid primary key default gen_random_uuid(),
+  debt_id uuid not null references public.debts (id) on delete cascade,
+  user_id uuid not null references auth.users (id) on delete cascade,
+  amount numeric(14, 2) not null check (amount > 0),
+  date date not null,
+  transaction_id uuid references public.transactions (id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists debt_payments_debt_id_idx
+  on public.debt_payments (debt_id);
+create index if not exists debt_payments_user_id_idx
+  on public.debt_payments (user_id);
+create unique index if not exists debt_payments_transaction_uidx
+  on public.debt_payments (transaction_id)
+  where transaction_id is not null;
+
+alter table public.debt_payments enable row level security;
+
+drop policy if exists "Pagos: select propios" on public.debt_payments;
+create policy "Pagos: select propios"
+  on public.debt_payments for select
+  using (auth.uid() = user_id);
+
+drop policy if exists "Pagos: insert propios" on public.debt_payments;
+create policy "Pagos: insert propios"
+  on public.debt_payments for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Pagos: update propios" on public.debt_payments;
+create policy "Pagos: update propios"
+  on public.debt_payments for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Pagos: delete propios" on public.debt_payments;
+create policy "Pagos: delete propios"
+  on public.debt_payments for delete
   using (auth.uid() = user_id);

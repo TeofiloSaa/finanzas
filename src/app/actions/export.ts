@@ -30,12 +30,13 @@ export async function exportarCSV(dataset: ExportDataset): Promise<ExportResult>
   // los límites de transacciones/metas/deudas.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan')
+    .select('plan, plan_expires_at')
     .eq('id', user.id)
     .maybeSingle()
   const plan = (profile?.plan as Plan) ?? 'free'
+  const planExpiresAt = profile?.plan_expires_at ?? null
 
-  if (!isPro(plan)) {
+  if (!isPro(plan, planExpiresAt)) {
     return {
       error: 'La exportación a CSV está disponible en el plan Pro.',
       upgradeRequired: true,

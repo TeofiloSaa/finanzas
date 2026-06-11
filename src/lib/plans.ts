@@ -10,8 +10,20 @@ export const PLAN_LIMITS: Record<Plan, Record<LimitedAction, number>> = {
   pro: { transactions: Infinity, goals: Infinity, debts: Infinity },
 }
 
-export function isPro(plan: Plan): boolean {
-  return plan === 'pro'
+// El usuario es Pro si plan='pro' Y la suscripción no venció: planExpiresAt null
+// (Pro activo, sin vencimiento) o todavía en el futuro (cancelado pero dentro del
+// período pago). Al comparar contra Date.now() en cada llamada, la expiración se
+// aplica sola, sin necesitar un cron que baje el plan al vencer.
+export function isPro(plan: Plan, planExpiresAt?: string | null): boolean {
+  if (plan !== 'pro') return false
+  if (!planExpiresAt) return true
+  return Date.parse(planExpiresAt) > Date.now()
+}
+
+// Plan efectivo para el gateo de límites: un Pro vencido se trata como Free.
+// Úsalo antes de canPerformAction cuando leés plan + plan_expires_at de la DB.
+export function effectivePlan(plan: Plan, planExpiresAt?: string | null): Plan {
+  return isPro(plan, planExpiresAt) ? 'pro' : 'free'
 }
 
 // currentCount = cantidad ya existente para esa acción.

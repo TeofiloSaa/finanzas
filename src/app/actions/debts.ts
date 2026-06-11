@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { canPerformAction } from '@/lib/plans'
+import { canPerformAction, effectivePlan } from '@/lib/plans'
 import type { DebtType, Plan } from '@/types'
 
 const LIMITE_FREE = 'Límite del plan Free alcanzado. Upgrade a Pro para continuar.'
@@ -43,10 +43,10 @@ export async function crearDeuda(formData: FormData) {
   // en un filtro, así que contamos en JS.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan')
+    .select('plan, plan_expires_at')
     .eq('id', user.id)
     .maybeSingle()
-  const plan = (profile?.plan as Plan) ?? 'free'
+  const plan = effectivePlan((profile?.plan as Plan) ?? 'free', profile?.plan_expires_at ?? null)
 
   const { data: existingDebts } = await supabase
     .from('debts')
@@ -85,15 +85,14 @@ export async function eliminarDeuda(id: string) {
 
   if (!user) redirect('/login')
 
-  const { error } = await supabase
-    .from('debts')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+  // D1: borrar la deuda DESLIGA sus transacciones de pago (quedan como gastos
+  // normales), no las borra. La RPC lo hace atómico.
+  const { error } = await supabase.rpc('deuda_eliminar', { p_debt_id: id })
 
-  if (error) return { error: error.message }
+  if (error) return { error: 'No se pudo eliminar la deuda.' }
 
   revalidatePath('/deudas')
+  revalidatePath('/transacciones')
   return { success: true }
 }
 
@@ -105,29 +104,93 @@ export async function pagarCuota(id: string) {
 
   if (!user) redirect('/login')
 
+  // El monto del pago es el de la cuota (total / cuotas). La validación de
+  // "deuda saldada" y el incremento los hace la RPC, atómicamente con la
+  // transacción de gasto (categoría 'Pago de deudas').
   const { data: debt, error: readError } = await supabase
     .from('debts')
-    .select('id, installments, paid_installments')
+    .select('id, installment_amount')
     .eq('id', id)
     .eq('user_id', user.id)
-    .single()
+    .maybeSingle()
 
   if (readError || !debt) {
     return { error: 'No se encontró la deuda.' }
   }
 
-  if (debt.paid_installments >= debt.installments) {
-    return { error: 'La deuda ya está saldada.' }
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+
+  const { error } = await supabase.rpc('pago_crear', {
+    p_debt_id: id,
+    p_amount: debt.installment_amount,
+    p_date: date,
+  })
+
+  if (error) {
+    if (error.message === 'deuda saldada') {
+      return { error: 'La deuda ya está saldada.' }
+    }
+    if (error.message === 'deuda no encontrada') {
+      return { error: 'No se encontró la deuda.' }
+    }
+    return { error: 'No se pudo registrar el pago.' }
   }
 
-  const { error: updateError } = await supabase
-    .from('debts')
-    .update({ paid_installments: debt.paid_installments + 1 })
-    .eq('id', id)
-    .eq('user_id', user.id)
+  revalidatePath('/deudas')
+  revalidatePath('/transacciones')
+  return { success: true }
+}
 
-  if (updateError) return { error: updateError.message }
+export async function revertirPago(paymentId: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) redirect('/login')
+
+  const { data: payment, error: readError } = await supabase
+    .from('debt_payments')
+    .select('id, debt_id, transaction_id')
+    .eq('id', paymentId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (readError || !payment) return { error: 'No se encontró el pago.' }
+
+  if (payment.transaction_id) {
+    // El despachador borra la transacción, el pago y decrementa paid_installments.
+    const { error } = await supabase.rpc('transaccion_eliminar', {
+      p_txn: payment.transaction_id,
+    })
+    if (error) return { error: 'No se pudo revertir el pago.' }
+  } else {
+    // Pago sin transacción ligada (defensivo): borrar + decrementar.
+    const { error: delError } = await supabase
+      .from('debt_payments')
+      .delete()
+      .eq('id', paymentId)
+      .eq('user_id', user.id)
+    if (delError) return { error: delError.message }
+
+    const { data: debt } = await supabase
+      .from('debts')
+      .select('id, paid_installments')
+      .eq('id', payment.debt_id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (debt) {
+      await supabase
+        .from('debts')
+        .update({ paid_installments: Math.max(debt.paid_installments - 1, 0) })
+        .eq('id', debt.id)
+        .eq('user_id', user.id)
+    }
+  }
 
   revalidatePath('/deudas')
+  revalidatePath('/transacciones')
   return { success: true }
 }

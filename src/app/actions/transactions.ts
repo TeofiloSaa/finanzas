@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { canPerformAction, isPro } from '@/lib/plans'
+import { canPerformAction, effectivePlan, isPro } from '@/lib/plans'
 import type { Plan, TransactionType } from '@/types'
 
 const LIMITE_FREE = 'Límite del plan Free alcanzado. Upgrade a Pro para continuar.'
@@ -60,10 +60,13 @@ async function countTransactionsInMonth(
   excludeId?: string
 ): Promise<number> {
   const { first, firstNext } = monthWindow(year, month)
+  // D3: las transacciones automáticas (aportes/pagos) NO cuentan contra el límite
+  // Free. Solo se cuentan las manuales (auto_origin null).
   let query = supabase
     .from('transactions')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
+    .is('auto_origin', null)
     .gte('date', first)
     .lt('date', firstNext)
   if (excludeId) query = query.neq('id', excludeId)
@@ -71,13 +74,16 @@ async function countTransactionsInMonth(
   return count ?? 0
 }
 
-async function readUserPlan(supabase: DB, userId: string): Promise<Plan> {
+// Devuelve el plan EFECTIVO para el gateo: un Pro vencido (plan_expires_at en el
+// pasado) cuenta como Free, así el límite se aplica aunque el webhook de baja
+// todavía no haya llegado.
+async function readEffectivePlan(supabase: DB, userId: string): Promise<Plan> {
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan')
+    .select('plan, plan_expires_at')
     .eq('id', userId)
     .maybeSingle()
-  return (profile?.plan as Plan) ?? 'free'
+  return effectivePlan((profile?.plan as Plan) ?? 'free', profile?.plan_expires_at ?? null)
 }
 
 export async function crearTransaccion(formData: FormData) {
@@ -106,7 +112,7 @@ export async function crearTransaccion(formData: FormData) {
   // Límite del plan Free: máximo de transacciones en el mes calendario del date
   // que se está insertando (no del mes actual). Contar contra el mes del date
   // evita el bypass de fechar la transacción en otro mes para esquivar el tope.
-  const plan = await readUserPlan(supabase, user.id)
+  const plan = await readEffectivePlan(supabase, user.id)
   const count = await countTransactionsInMonth(
     supabase,
     user.id,
@@ -156,16 +162,25 @@ export async function editarTransaccion(id: string, formData: FormData) {
     return { error: 'La fecha no es válida.' }
   }
 
-  // Necesitamos el date actual para saber si la edición mueve la transacción de mes.
+  // Necesitamos el date actual para saber si la edición mueve la transacción de mes,
+  // y el auto_origin para no permitir editar transacciones automáticas.
   const { data: current, error: readError } = await supabase
     .from('transactions')
-    .select('date')
+    .select('date, auto_origin')
     .eq('id', id)
     .eq('user_id', user.id)
     .maybeSingle()
 
   if (readError || !current) {
     return { error: 'No se encontró la transacción.' }
+  }
+
+  // Las transacciones automáticas se modifican desde su aporte/pago de origen,
+  // no desde el listado: editarlas acá desincronizaría el monto con la meta/deuda.
+  if (current.auto_origin) {
+    return {
+      error: 'Esta transacción se generó automáticamente. Editá el aporte o pago de origen.',
+    }
   }
 
   // Si el date nuevo cae en otro mes, el mes destino tiene que respetar el límite
@@ -179,7 +194,7 @@ export async function editarTransaccion(id: string, formData: FormData) {
     currentParsed.month !== parsed.month
 
   if (mesCambia) {
-    const plan = await readUserPlan(supabase, user.id)
+    const plan = await readEffectivePlan(supabase, user.id)
     if (!isPro(plan)) {
       // Excluimos la propia transacción del conteo del mes destino: hoy vive en su
       // mes viejo, pero excluirla es defensivo ante un date actual corrupto.
@@ -216,14 +231,15 @@ export async function eliminarTransaccion(id: string) {
 
   if (!user) redirect('/login')
 
-  const { error } = await supabase
-    .from('transactions')
-    .delete()
-    .eq('id', id)
-    .eq('user_id', user.id)
+  // D2: si la transacción es automática, el despachador revierte su aporte/pago
+  // de origen (borra la fila y ajusta la meta/deuda) además de borrar la fila.
+  // Para transacciones manuales, solo borra. Todo atómico en una transacción de DB.
+  const { error } = await supabase.rpc('transaccion_eliminar', { p_txn: id })
 
-  if (error) return { error: error.message }
+  if (error) return { error: 'No se pudo eliminar la transacción.' }
 
   revalidatePath('/transacciones')
+  revalidatePath('/ahorros')
+  revalidatePath('/deudas')
   return { success: true }
 }

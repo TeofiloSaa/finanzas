@@ -14,9 +14,11 @@ import type { Plan } from '@/types'
 
 export default function PricingClient({
   plan,
+  planExpiresAt,
   subscriptionId,
 }: {
   plan: Plan
+  planExpiresAt: string | null
   subscriptionId: string | null
 }) {
   const router = useRouter()
@@ -24,7 +26,7 @@ export default function PricingClient({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const pro = isPro(plan)
+  const pro = isPro(plan, planExpiresAt)
 
   async function handleUpgrade() {
     setError(null)

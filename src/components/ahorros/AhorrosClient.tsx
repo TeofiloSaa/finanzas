@@ -3,12 +3,18 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, PiggyBank } from 'lucide-react'
-import type { SavingsGoal } from '@/types'
+import type { SavingsGoal, SavingsContribution } from '@/types'
 import MetaCard from './MetaCard'
 import NuevaMetaModal from './NuevaMetaModal'
 import NuevoAporteModal from './NuevoAporteModal'
 
-export default function AhorrosClient({ goals }: { goals: SavingsGoal[] }) {
+export default function AhorrosClient({
+  goals,
+  contributions,
+}: {
+  goals: SavingsGoal[]
+  contributions: SavingsContribution[]
+}) {
   const router = useRouter()
   const [nuevaOpen, setNuevaOpen] = useState(false)
   const [aporteGoal, setAporteGoal] = useState<SavingsGoal | null>(null)
@@ -22,6 +28,17 @@ export default function AhorrosClient({ goals }: { goals: SavingsGoal[] }) {
     }
     return { activas: a, completadas: c }
   }, [goals])
+
+  // Aportes agrupados por meta (ya vienen ordenados por fecha desc).
+  const contributionsByGoal = useMemo(() => {
+    const map = new Map<string, SavingsContribution[]>()
+    for (const c of contributions) {
+      const list = map.get(c.goal_id)
+      if (list) list.push(c)
+      else map.set(c.goal_id, [c])
+    }
+    return map
+  }, [contributions])
 
   function handleSuccess() {
     setNuevaOpen(false)
@@ -96,6 +113,7 @@ export default function AhorrosClient({ goals }: { goals: SavingsGoal[] }) {
               <MetaCard
                 key={g.id}
                 goal={g}
+                contributions={contributionsByGoal.get(g.id) ?? []}
                 onAportar={() => setAporteGoal(g)}
                 onDeleted={handleDeleted}
               />
@@ -124,6 +142,7 @@ export default function AhorrosClient({ goals }: { goals: SavingsGoal[] }) {
               <MetaCard
                 key={g.id}
                 goal={g}
+                contributions={contributionsByGoal.get(g.id) ?? []}
                 onAportar={() => setAporteGoal(g)}
                 onDeleted={handleDeleted}
               />

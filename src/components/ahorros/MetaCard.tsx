@@ -1,11 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, Plus, Calendar, Check } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Trash2, Plus, Calendar, Check, ChevronDown, X } from 'lucide-react'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { eliminarMeta } from '@/app/actions/savings'
+import { eliminarMeta, eliminarAporte } from '@/app/actions/savings'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
-import type { SavingsGoal } from '@/types'
+import type { SavingsGoal, SavingsContribution } from '@/types'
 
 function daysUntil(deadline: string): number {
   const [year, month, day] = deadline.split('-').map(Number)
@@ -18,14 +19,19 @@ function daysUntil(deadline: string): number {
 
 export default function MetaCard({
   goal,
+  contributions,
   onAportar,
   onDeleted,
 }: {
   goal: SavingsGoal
+  contributions: SavingsContribution[]
   onAportar: () => void
   onDeleted: () => void
 }) {
+  const router = useRouter()
   const [deleting, setDeleting] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const [removingId, setRemovingId] = useState<string | null>(null)
   const confirm = useConfirm()
 
   const current = Number(goal.current_amount)
@@ -50,6 +56,19 @@ export default function MetaCard({
     setDeleting(true)
     await eliminarMeta(goal.id)
     onDeleted()
+  }
+
+  async function handleDeleteAporte(c: SavingsContribution) {
+    const ok = await confirm({
+      title: 'Eliminar aporte',
+      message: `¿Eliminar el aporte de ${formatCurrency(Number(c.amount))} del ${formatDate(c.date)}? También se borra su transacción de gasto.`,
+      confirmLabel: 'Eliminar',
+      variant: 'danger',
+    })
+    if (!ok) return
+    setRemovingId(c.id)
+    await eliminarAporte(c.id)
+    router.refresh()
   }
 
   return (
@@ -168,6 +187,53 @@ export default function MetaCard({
           </button>
         )}
       </div>
+
+      {/* Historial de aportes */}
+      {contributions.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-fg/5">
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="flex items-center gap-1.5 text-xs text-fg/45 hover:text-fg/70 transition-colors cursor-pointer"
+            aria-expanded={expanded}
+          >
+            <ChevronDown
+              size={13}
+              strokeWidth={2}
+              className="transition-transform"
+              style={{ transform: expanded ? 'rotate(180deg)' : 'none' }}
+            />
+            {contributions.length} aporte{contributions.length === 1 ? '' : 's'}
+          </button>
+
+          {expanded && (
+            <ul className="mt-2 flex flex-col gap-1">
+              {contributions.map((c) => (
+                <li
+                  key={c.id}
+                  className={`flex items-center justify-between gap-2 text-xs py-1 transition-opacity ${
+                    removingId === c.id ? 'opacity-40 pointer-events-none' : ''
+                  }`}
+                >
+                  <span className="text-fg/40">{formatDate(c.date)}</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-fg/70 font-medium tabular-nums">
+                      {formatCurrency(Number(c.amount))}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteAporte(c)}
+                      disabled={removingId === c.id}
+                      className="p-1 rounded text-fg/25 hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      aria-label="Eliminar aporte"
+                    >
+                      <X size={13} strokeWidth={2} />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   )
 }
