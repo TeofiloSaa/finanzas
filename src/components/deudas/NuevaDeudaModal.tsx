@@ -133,7 +133,7 @@ export default function NuevaDeudaModal({
               <input
                 id="total_amount"
                 type="text"
-                inputMode="numeric"
+                inputMode="decimal"
                 required
                 placeholder="0"
                 value={amountDisplay}

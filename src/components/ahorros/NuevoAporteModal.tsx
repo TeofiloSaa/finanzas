@@ -81,7 +81,7 @@ export default function NuevoAporteModal({
             <input
               id="amount"
               type="text"
-              inputMode="numeric"
+              inputMode="decimal"
               required
               autoFocus
               placeholder="0"

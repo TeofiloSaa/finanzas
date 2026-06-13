@@ -86,7 +86,7 @@ export default function NuevaMetaModal({
             <input
               id="target_amount"
               type="text"
-              inputMode="numeric"
+              inputMode="decimal"
               required
               placeholder="0"
               value={amountDisplay}

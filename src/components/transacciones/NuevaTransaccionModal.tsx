@@ -31,7 +31,7 @@ export default function NuevaTransaccionModal({
   const [needsUpgrade, setNeedsUpgrade] = useState(false)
   const [amountDisplay, setAmountDisplay] = useState(() =>
     transaction?.amount != null
-      ? formatInputMonto(String(Math.round(Number(transaction.amount))))
+      ? formatInputMonto(String(Number(transaction.amount)).replace('.', ','))
       : ''
   )
 
@@ -152,7 +152,7 @@ export default function NuevaTransaccionModal({
               <input
                 id="amount"
                 type="text"
-                inputMode="numeric"
+                inputMode="decimal"
                 placeholder="0"
                 required
                 autoFocus
