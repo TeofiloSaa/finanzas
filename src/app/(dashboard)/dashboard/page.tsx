@@ -31,19 +31,32 @@ export default async function DashboardPage() {
 
   const startStr = toDateString(sixMonthsStart)
   const endStr = toDateString(nextMonthStart)
+  // Inicio de la ventana del gráfico de patrimonio: primer día del mes hace 11 meses
+  // (12 meses contando el actual). Se calcula acá para acotar las queries de abajo.
+  const windowStartStr = toDateString(new Date(currentYear, currentMonth - 11, 1))
 
-  const [txRes, allTxRes, goalsRes, debtsRes] = await Promise.all([
+  const [txRes, patrimonioTxRes, baselineRes, goalsRes, debtsRes] = await Promise.all([
     supabase
       .from('transactions')
       .select('*')
       .eq('user_id', user.id)
       .gte('date', startStr)
       .lt('date', endStr),
-    // Todas las transacciones (sin filtro de fecha) para el patrimonio acumulado
+    // Patrimonio: solo las transacciones de los últimos 12 meses (el detalle que se
+    // grafica mes a mes). El histórico previo no se baja fila por fila.
     supabase
       .from('transactions')
       .select('date, type, amount')
-      .eq('user_id', user.id),
+      .eq('user_id', user.id)
+      .gte('date', windowStartStr)
+      .lt('date', endStr),
+    // Punto de partida del gráfico: balance acumulado ANTERIOR a la ventana, agregado
+    // server-side con sum() agrupado por tipo (en vez de traer miles de filas).
+    supabase
+      .from('transactions')
+      .select('type, total:amount.sum()')
+      .eq('user_id', user.id)
+      .lt('date', windowStartStr),
     supabase
       .from('savings_goals')
       .select('*')
@@ -105,21 +118,49 @@ export default async function DashboardPage() {
   // Net firmado por transacción: ingreso suma, gasto resta.
   // El patrimonio de un mes = acumulado de TODO hasta el fin de ese mes.
   type TxLite = { date: string; type: Transaction['type']; amount: number }
-  const allTx = (allTxRes.data ?? []) as TxLite[]
+  const windowTx = (patrimonioTxRes.data ?? []) as TxLite[]
 
-  const windowStartStr = toDateString(new Date(currentYear, currentMonth - 11, 1))
-  const mesesConDatos = new Set<string>()
-  let baseline = 0 // acumulado de meses anteriores a la ventana
-  const netByMonth = new Map<string, number>()
+  // Baseline = balance acumulado real hasta justo antes de la ventana (ingreso suma,
+  // gasto resta). Si no hay filas previas, 0.
+  type BaselineRow = { type: Transaction['type']; total: number | string | null }
+  let baseline = 0
+  let tieneHistorialPrevio = false
 
-  for (const t of allTx) {
-    const amt = t.type === 'ingreso' ? Number(t.amount) : -Number(t.amount)
-    mesesConDatos.add(t.date.slice(0, 7))
-    if (t.date < windowStartStr) {
-      baseline += amt
-      continue
+  if (baselineRes.error) {
+    // Fallback: la agregación de PostgREST (amount.sum()) puede estar deshabilitada en
+    // el proyecto. La RPC hace el SUM en SQL (SECURITY INVOKER => respeta RLS) y
+    // devuelve el neto. Solo corre en el camino de error, así que el costo extra es raro.
+    console.error('[dashboard] sum() de baseline falló, usando RPC fallback:', baselineRes.error)
+    const { data: rpcBaseline, error: rpcError } = await supabase.rpc(
+      'patrimonio_baseline',
+      { p_date: windowStartStr }
+    )
+    if (rpcError) {
+      console.error('[dashboard] RPC patrimonio_baseline falló:', rpcError)
+    } else {
+      baseline = Number(rpcBaseline ?? 0)
+      // La RPC devuelve solo el neto (no el conteo de filas), así que aproximamos:
+      // si el neto previo no es 0, hubo historial. (Un neto exactamente 0 con historial
+      // previo se trataría como "sin historial" en el empty-state; caso muy marginal.)
+      tieneHistorialPrevio = baseline !== 0
     }
+  } else {
+    const baselineRows = (baselineRes.data ?? []) as unknown as BaselineRow[]
+    for (const row of baselineRows) {
+      const total = Number(row.total ?? 0)
+      baseline += row.type === 'ingreso' ? total : -total
+    }
+    // Hay historial previo si la query agregada devolvió alguna fila (algún tipo con
+    // transacciones antes de la ventana), aunque el neto dé 0.
+    tieneHistorialPrevio = baselineRows.length > 0
+  }
+
+  const mesesConDatos = new Set<string>()
+  const netByMonth = new Map<string, number>()
+  for (const t of windowTx) {
+    const amt = t.type === 'ingreso' ? Number(t.amount) : -Number(t.amount)
     const prefix = t.date.slice(0, 7) // YYYY-MM
+    mesesConDatos.add(prefix)
     netByMonth.set(prefix, (netByMonth.get(prefix) ?? 0) + amt)
   }
 
@@ -135,8 +176,11 @@ export default async function DashboardPage() {
     })
   }
 
-  // El componente muestra empty state con menos de 2 puntos.
-  const patrimonioChartData = mesesConDatos.size < 2 ? [] : patrimonioData
+  // El componente muestra empty state con menos de 2 "puntos" con datos. El historial
+  // previo (baseline) cuenta como un punto de arranque, además de cada mes con datos
+  // dentro de la ventana.
+  const puntosConDatos = mesesConDatos.size + (tieneHistorialPrevio ? 1 : 0)
+  const patrimonioChartData = puntosConDatos < 2 ? [] : patrimonioData
 
   const tituloMes = `${MONTHS_ES_LONG[currentMonth]} ${currentYear}`
 
