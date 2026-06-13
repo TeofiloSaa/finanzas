@@ -71,7 +71,10 @@ export async function crearDeuda(formData: FormData) {
     start_date,
   })
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[crearDeuda] insert falló:', error)
+    return { error: 'No se pudo guardar. Intentá de nuevo.' }
+  }
 
   revalidatePath('/deudas')
   return { success: true }
@@ -173,7 +176,10 @@ export async function revertirPago(paymentId: string) {
       .delete()
       .eq('id', paymentId)
       .eq('user_id', user.id)
-    if (delError) return { error: delError.message }
+    if (delError) {
+      console.error('[revertirPago] delete falló:', delError)
+      return { error: 'No se pudo eliminar. Intentá de nuevo.' }
+    }
 
     const { data: debt } = await supabase
       .from('debts')

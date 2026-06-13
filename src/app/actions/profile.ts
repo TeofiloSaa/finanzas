@@ -26,7 +26,10 @@ export async function updateProfile(formData: FormData) {
       { onConflict: 'id' }
     )
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[updateProfile] upsert falló:', error)
+    return { error: 'No se pudo actualizar. Intentá de nuevo.' }
+  }
 
   revalidatePath('/configuracion')
   return { success: true }

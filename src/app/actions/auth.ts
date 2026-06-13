@@ -12,7 +12,8 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    return { error: error.message }
+    console.error('[login] signIn falló:', error)
+    return { error: 'Email o contraseña incorrectos. Revisá tus datos e intentá de nuevo.' }
   }
 
   redirect('/dashboard')
@@ -38,7 +39,8 @@ export async function register(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    console.error('[register] signUp falló:', error)
+    return { error: 'No se pudo crear la cuenta. Intentá de nuevo.' }
   }
 
   // Con confirmación por email, signUp no crea sesión: el usuario debe
@@ -56,7 +58,8 @@ export async function forgotPassword(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    console.error('[forgotPassword] resetPasswordForEmail falló:', error)
+    return { error: 'No se pudo enviar el email. Intentá de nuevo.' }
   }
 
   return { success: true }

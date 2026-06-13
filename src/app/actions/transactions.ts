@@ -133,7 +133,10 @@ export async function crearTransaccion(formData: FormData) {
     date,
   })
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[crearTransaccion] insert falló:', error)
+    return { error: 'No se pudo guardar. Intentá de nuevo.' }
+  }
 
   revalidatePath('/transacciones')
   return { success: true }
@@ -217,7 +220,10 @@ export async function editarTransaccion(id: string, formData: FormData) {
     .eq('id', id)
     .eq('user_id', user.id)
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[editarTransaccion] update falló:', error)
+    return { error: 'No se pudo actualizar. Intentá de nuevo.' }
+  }
 
   revalidatePath('/transacciones')
   return { success: true }

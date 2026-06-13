@@ -52,7 +52,10 @@ export async function exportarCSV(dataset: ExportDataset): Promise<ExportResult>
       .eq('user_id', user.id)
       .order('date', { ascending: false })
 
-    if (error) return { error: error.message }
+    if (error) {
+      console.error('[exportarCSV] select transactions falló:', error)
+      return { error: 'No se pudo exportar. Intentá de nuevo.' }
+    }
 
     const rows = (data as Transaction[]).map((t) => [
       t.date,
@@ -76,7 +79,10 @@ export async function exportarCSV(dataset: ExportDataset): Promise<ExportResult>
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
-    if (error) return { error: error.message }
+    if (error) {
+      console.error('[exportarCSV] select savings_goals falló:', error)
+      return { error: 'No se pudo exportar. Intentá de nuevo.' }
+    }
 
     const rows = (data as SavingsGoal[]).map((g) => [
       g.name,
@@ -100,7 +106,10 @@ export async function exportarCSV(dataset: ExportDataset): Promise<ExportResult>
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
 
-    if (error) return { error: error.message }
+    if (error) {
+      console.error('[exportarCSV] select debts falló:', error)
+      return { error: 'No se pudo exportar. Intentá de nuevo.' }
+    }
 
     const rows = (data as Debt[]).map((d) => [
       d.name,

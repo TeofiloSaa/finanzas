@@ -44,7 +44,10 @@ export async function seedDefaultCategories() {
     .eq('user_id', userId)
     .eq('is_default', true)
 
-  if (countError) return { error: countError.message }
+  if (countError) {
+    console.error('[seedDefaultCategories] count falló:', countError)
+    return { error: 'No se pudo guardar. Intentá de nuevo.' }
+  }
   if (count && count > 0) return { success: true }
 
   // sort_order incremental por tipo (0, 1, 2... para gastos; 0, 1, 2... para ingresos)
@@ -74,7 +77,10 @@ export async function seedDefaultCategories() {
   const { error } = await supabase
     .from('categories')
     .insert([...rows, ...systemRows])
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[seedDefaultCategories] insert falló:', error)
+    return { error: 'No se pudo guardar. Intentá de nuevo.' }
+  }
 
   return { success: true }
 }
@@ -98,7 +104,10 @@ export async function limpiarCategoriasDuplicadas() {
     .eq('user_id', userId)
     .order('created_at', { ascending: true })
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[limpiarCategoriasDuplicadas] select falló:', error)
+    return { error: 'No se pudo eliminar. Intentá de nuevo.' }
+  }
   if (!cats || cats.length === 0) return { success: true }
 
   const seen = new Set<string>()
@@ -121,7 +130,10 @@ export async function limpiarCategoriasDuplicadas() {
     .eq('user_id', userId)
     .in('id', toDelete)
 
-  if (delError) return { error: delError.message }
+  if (delError) {
+    console.error('[limpiarCategoriasDuplicadas] delete falló:', delError)
+    return { error: 'No se pudo eliminar. Intentá de nuevo.' }
+  }
 
   return { success: true, removed: toDelete.length }
 }
@@ -176,7 +188,10 @@ export async function crearCategoria(formData: FormData) {
     sort_order: nextSortOrder,
   })
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[crearCategoria] insert falló:', error)
+    return { error: 'No se pudo guardar. Intentá de nuevo.' }
+  }
 
   revalidatePath('/configuracion')
   revalidatePath('/transacciones')
@@ -214,7 +229,10 @@ export async function eliminarCategoria(id: string) {
     .eq('user_id', user.id)
     .eq('is_default', false)
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[eliminarCategoria] delete falló:', error)
+    return { error: 'No se pudo eliminar. Intentá de nuevo.' }
+  }
 
   revalidatePath('/configuracion')
   revalidatePath('/transacciones')
@@ -285,7 +303,10 @@ export async function reordenarCategoria(id: string, direction: 'up' | 'down') {
       .update({ sort_order: u.sort_order })
       .eq('id', u.id)
       .eq('user_id', user.id)
-    if (updError) return { error: updError.message }
+    if (updError) {
+      console.error('[reordenarCategoria] update falló:', updError)
+      return { error: 'No se pudo actualizar. Intentá de nuevo.' }
+    }
   }
 
   revalidatePath('/configuracion')

@@ -52,7 +52,10 @@ export async function crearMeta(formData: FormData) {
     completed: false,
   })
 
-  if (error) return { error: error.message }
+  if (error) {
+    console.error('[crearMeta] insert falló:', error)
+    return { error: 'No se pudo guardar. Intentá de nuevo.' }
+  }
 
   revalidatePath('/ahorros')
   return { success: true }
@@ -152,7 +155,10 @@ export async function eliminarAporte(contributionId: string) {
       .delete()
       .eq('id', contributionId)
       .eq('user_id', user.id)
-    if (delError) return { error: delError.message }
+    if (delError) {
+      console.error('[eliminarAporte] delete falló:', delError)
+      return { error: 'No se pudo eliminar. Intentá de nuevo.' }
+    }
 
     if (goal) {
       const newCurrent = Math.max(
