@@ -16,6 +16,9 @@ import { FREE_FEATURES, PRO_FEATURES } from '@/lib/plan-features'
 const TITLE = 'Finanzas — Controlá tus gastos, ahorros y deudas'
 const DESCRIPTION =
   'Registrá tus gastos e ingresos, seguí tus metas de ahorro y no te atrases con ninguna cuota. Gratis para empezar, sin vueltas.'
+// og:description acotada a <125 caracteres (los scrapers truncan ahí); mantiene el sentido.
+const OG_DESCRIPTION =
+  'Registrá gastos e ingresos, seguí tus metas de ahorro y no te atrases con ninguna cuota. Gratis para empezar.'
 const OG_IMAGE = 'https://finanzas-sand-nu.vercel.app/og-image.png'
 
 export const metadata: Metadata = {
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   openGraph: {
     title: TITLE,
-    description: DESCRIPTION,
+    description: OG_DESCRIPTION,
     url: 'https://finanzas-sand-nu.vercel.app/landing',
     siteName: 'Finanzas',
     type: 'website',
