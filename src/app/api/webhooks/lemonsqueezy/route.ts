@@ -94,19 +94,9 @@ export async function POST(request: Request) {
       details: error.details,
       hint: error.hint,
     })
-    // Devolvemos el código/mensaje de Postgres en el body para poder
-    // diagnosticar desde el "Recent Deliveries" de Lemon Squeezy sin abrir
-    // los logs de Vercel. No expone secretos: solo metadata del error de DB.
-    return Response.json(
-      {
-        error: 'Database error',
-        code: error.code ?? null,
-        message: error.message ?? null,
-        details: error.details ?? null,
-        hint: error.hint ?? null,
-      },
-      { status: 500 }
-    )
+    // El detalle del error queda solo en console.error (logs de Vercel); el body
+    // de la respuesta no expone metadata interna de Postgres.
+    return Response.json({ error: 'Database error' }, { status: 500 })
   }
 
   return new Response('OK', { status: 200 })
