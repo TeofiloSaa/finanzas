@@ -13,10 +13,35 @@ import {
 } from 'lucide-react'
 import { FREE_FEATURES, PRO_FEATURES } from '@/lib/plan-features'
 
+const TITLE = 'Finanzas — Controlá tus gastos, ahorros y deudas'
+const DESCRIPTION =
+  'Registrá tus gastos e ingresos, seguí tus metas de ahorro y no te atrases con ninguna cuota. Gratis para empezar, sin vueltas.'
+const OG_IMAGE = 'https://finanzas-sand-nu.vercel.app/og-image.png'
+
 export const metadata: Metadata = {
-  title: 'Finanzas — Controlá tus gastos, ahorros y deudas',
-  description:
-    'Registrá tus gastos e ingresos, seguí tus metas de ahorro y no te atrases con ninguna cuota. Gratis para empezar, sin vueltas.',
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: 'https://finanzas-sand-nu.vercel.app/landing',
+    siteName: 'Finanzas',
+    type: 'website',
+    images: [
+      {
+        url: OG_IMAGE,
+        width: 1200,
+        height: 630,
+        alt: 'Finanzas — Tu plata, en orden',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
+  },
 }
 
 const FEATURES: {
