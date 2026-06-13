@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, TrendingUp, TrendingDown, Wallet, CalendarClock } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, pad, toDateString, proximoVencimiento } from '@/lib/utils'
 import GastosDonut from '@/components/dashboard/GastosDonut'
 import IngresosGastosBar from '@/components/dashboard/IngresosGastosBar'
 import PatrimonioChart from '@/components/dashboard/PatrimonioChart'
@@ -12,26 +12,6 @@ export const revalidate = 30
 
 const MONTHS_ES_SHORT = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 const MONTHS_ES_LONG = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
-
-function pad(n: number) {
-  return String(n).padStart(2, '0')
-}
-
-function toDateString(d: Date) {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-}
-
-function calcularProximoVencimiento(dueDay: number): Date {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const y = today.getFullYear()
-  const m = today.getMonth()
-  const daysInThisMonth = new Date(y, m + 1, 0).getDate()
-  const candidate = new Date(y, m, Math.min(dueDay, daysInThisMonth))
-  if (today.getTime() <= candidate.getTime()) return candidate
-  const daysInNext = new Date(y, m + 2, 0).getDate()
-  return new Date(y, m + 1, Math.min(dueDay, daysInNext))
-}
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -362,7 +342,7 @@ function DeudasWidget({ debts }: { debts: Debt[] }) {
             const restante =
               Number(d.total_amount) -
               Number(d.installment_amount) * d.paid_installments
-            const nextDue = calcularProximoVencimiento(d.due_day)
+            const { date: nextDue } = proximoVencimiento(d.due_day)
             return (
               <li
                 key={d.id}
@@ -372,7 +352,7 @@ function DeudasWidget({ debts }: { debts: Debt[] }) {
                   <p className="text-sm text-fg truncate">{d.name}</p>
                   <div className="flex items-center gap-1 text-xs text-fg/40 mt-0.5">
                     <CalendarClock size={11} />
-                    <span>{formatDate(toDateString(nextDue))}</span>
+                    <span>{formatDate(nextDue)}</span>
                   </div>
                 </div>
                 <span

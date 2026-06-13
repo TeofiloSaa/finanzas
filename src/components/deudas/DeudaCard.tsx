@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Trash2, Check, CreditCard, Banknote, Receipt, CalendarClock, Undo2 } from 'lucide-react'
-import { formatCurrency, formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate, proximoVencimiento } from '@/lib/utils'
 import { eliminarDeuda, pagarCuota, revertirPago } from '@/app/actions/debts'
 import { useConfirm } from '@/components/ui/ConfirmProvider'
 import type { Debt, DebtType, DebtPayment } from '@/types'
@@ -11,41 +11,6 @@ const TYPE_META: Record<DebtType, { label: string; Icon: typeof CreditCard }> = 
   prestamo: { label: 'Préstamo', Icon: Banknote },
   tarjeta: { label: 'Tarjeta', Icon: CreditCard },
   otro: { label: 'Otro', Icon: Receipt },
-}
-
-function calcularProximoVencimiento(dueDay: number): {
-  date: Date
-  daysUntil: number
-} {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const year = today.getFullYear()
-  const month = today.getMonth()
-
-  const daysInThisMonth = new Date(year, month + 1, 0).getDate()
-  const thisMonthDue = Math.min(dueDay, daysInThisMonth)
-  const candidateThisMonth = new Date(year, month, thisMonthDue)
-
-  let target: Date
-  if (today.getTime() <= candidateThisMonth.getTime()) {
-    target = candidateThisMonth
-  } else {
-    const daysInNextMonth = new Date(year, month + 2, 0).getDate()
-    const nextMonthDue = Math.min(dueDay, daysInNextMonth)
-    target = new Date(year, month + 1, nextMonthDue)
-  }
-
-  const daysUntil = Math.round(
-    (target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-  )
-  return { date: target, daysUntil }
-}
-
-function formatDateObj(d: Date): string {
-  const day = String(d.getDate()).padStart(2, '0')
-  const month = String(d.getMonth() + 1).padStart(2, '0')
-  const year = d.getFullYear()
-  return `${day}/${month}/${year}`
 }
 
 export default function DeudaCard({
@@ -69,7 +34,7 @@ export default function DeudaCard({
   const restante = total - installmentAmount * paid
   const progress = totalCuotas > 0 ? (paid / totalCuotas) * 100 : 0
 
-  const { date: nextDueDate, daysUntil } = calcularProximoVencimiento(debt.due_day)
+  const { date: nextDueDate, daysUntil } = proximoVencimiento(debt.due_day)
   const vencimientoUrgente = !saldada && daysUntil >= 0 && daysUntil <= 3
 
   const { label: typeLabel, Icon: TypeIcon } = TYPE_META[debt.type]
@@ -219,7 +184,7 @@ export default function DeudaCard({
             className="text-xs font-semibold ml-auto"
             style={{ color: vencimientoUrgente ? '#fbbf24' : 'var(--fg)' }}
           >
-            {formatDateObj(nextDueDate)}
+            {formatDate(nextDueDate)}
             <span className="text-fg/40 font-normal ml-1.5">
               {daysUntil === 0
                 ? '(hoy)'

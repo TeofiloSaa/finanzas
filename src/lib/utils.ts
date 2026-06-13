@@ -5,9 +5,54 @@ export function formatCurrency(amount: number): string {
   }).format(amount)
 }
 
-export function formatDate(dateString: string): string {
-  const [year, month, day] = dateString.split('-')
-  return `${day}/${month}/${year}`
+// Padding a 2 dígitos para componentes de fecha (mes, día).
+export function pad(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+// Formatea una fecha como 'DD/MM/YYYY'. Acepta un string 'YYYY-MM-DD' (como vienen
+// de la DB) o un objeto Date (interpretado en hora local, sin desfase de timezone).
+export function formatDate(date: string | Date): string {
+  if (typeof date === 'string') {
+    const [year, month, day] = date.split('-')
+    return `${day}/${month}/${year}`
+  }
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`
+}
+
+// Date local → 'YYYY-MM-DD' (sin el desfase de timezone que introduce toISOString).
+export function toDateString(d: Date): string {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+const MS_POR_DIA = 1000 * 60 * 60 * 24
+
+// Días enteros (redondeados) entre dos fechas. Positivo si `hasta` es posterior a `desde`.
+export function diasEntre(desde: Date, hasta: Date): number {
+  return Math.round((hasta.getTime() - desde.getTime()) / MS_POR_DIA)
+}
+
+// Próximo vencimiento de una deuda según su día de pago mensual. Si el día ya pasó
+// este mes, devuelve el del mes siguiente. Clampa el día al último del mes (ej.
+// due_day 31 en un mes de 30). daysUntil = días que faltan (>= 0).
+export function proximoVencimiento(dueDay: number): { date: Date; daysUntil: number } {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const year = today.getFullYear()
+  const month = today.getMonth()
+
+  const daysInThisMonth = new Date(year, month + 1, 0).getDate()
+  const candidateThisMonth = new Date(year, month, Math.min(dueDay, daysInThisMonth))
+
+  let date: Date
+  if (today.getTime() <= candidateThisMonth.getTime()) {
+    date = candidateThisMonth
+  } else {
+    const daysInNextMonth = new Date(year, month + 2, 0).getDate()
+    date = new Date(year, month + 1, Math.min(dueDay, daysInNextMonth))
+  }
+
+  return { date, daysUntil: diasEntre(today, date) }
 }
 
 export function cn(...classes: (string | undefined | false | null)[]): string {

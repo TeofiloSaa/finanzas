@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { diasEntre } from '@/lib/utils'
 import type { Debt } from '@/types'
 
 interface DebtAlert {
@@ -53,9 +54,7 @@ export default function DebtAlerts() {
 
         const day = Math.min(debt.due_day, daysInMonth)
         const dueDate = new Date(year, month, day)
-        const diffDays = Math.round(
-          (dueDate.getTime() - today.getTime()) / 86_400_000
-        )
+        const diffDays = diasEntre(today, dueDate)
 
         // Vence en más de 7 días → no es crítica.
         if (diffDays > 7) continue
