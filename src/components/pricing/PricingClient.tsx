@@ -12,6 +12,15 @@ import { isPro } from '@/lib/plans'
 import { FREE_FEATURES, PRO_FEATURES } from '@/lib/plan-features'
 import type { Plan } from '@/types'
 
+// Formatea un timestamp ISO (plan_expires_at es timestamptz en UTC) como
+// DD/MM/YYYY en horario de Argentina, para no correr la fecha un día.
+const expiryFormatter = new Intl.DateTimeFormat('es-AR', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric',
+  timeZone: 'America/Argentina/Buenos_Aires',
+})
+
 export default function PricingClient({
   plan,
   planExpiresAt,
@@ -27,6 +36,11 @@ export default function PricingClient({
   const [error, setError] = useState<string | null>(null)
 
   const pro = isPro(plan, planExpiresAt)
+  // Pro activo sin cancelar: sin fecha de expiración → ofrecemos cancelar.
+  // Pro cancelado con período pago vigente: pro sigue true pero hay fecha de
+  // expiración futura → no ofrecemos cancelar de nuevo, informamos hasta cuándo.
+  const proCancelado = pro && planExpiresAt !== null
+  const proActivo = pro && planExpiresAt === null
 
   async function handleUpgrade() {
     setError(null)
@@ -150,7 +164,7 @@ export default function PricingClient({
             ))}
           </ul>
 
-          {pro ? (
+          {proActivo ? (
             <button
               type="button"
               onClick={handleCancel}
@@ -160,6 +174,14 @@ export default function PricingClient({
               {loading && <Loader2 size={16} className="animate-spin" />}
               Cancelar suscripción
             </button>
+          ) : proCancelado ? (
+            <div className="mt-6 text-center text-sm py-2.5 px-3 rounded-lg border border-fg/10 text-fg/50">
+              Tu plan Pro está activo hasta el{' '}
+              <span className="text-fg/70 font-medium">
+                {expiryFormatter.format(new Date(planExpiresAt))}
+              </span>
+              . Después pasará automáticamente a Free.
+            </div>
           ) : (
             <button
               type="button"
